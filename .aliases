@@ -1,0 +1,21 @@
+alias dotfiles='git --git-dir=$HOME/.dotfiles --work-tree=$HOME'
+
+alias ez='nano ~/.aliases && source ~/.bash_profile'
+alias musicprep='python3 $SOURCEDIR/utils/music-prep.py'
+alias cleanup='python3 $SOURCEDIR/utils/cleanup.py'
+alias handphone-encode='python3 $SOURCEDIR/utils/handphone-encode.py'
+alias ee='python3 $SOURCEDIR/utils/emailexists.py'
+alias video='python3 $SOURCEDIR/utils/video.py'
+
+alias ii='ipython -i'
+alias coins='cd $SOURCEDIR/cryptocoins && workon coins'
+alias rankshaper='cd $SOURCEDIR/rankshaper && workon rankshaper'
+
+alias mkmig='./manage.py makemigrations && ./manage.py migrate'
+alias rmmigrations='rm pr9seotool/apps/website/migrations/0*.py'
+
+alias rmqrl='rm -rf ~/.qrl/data'
+alias qrl='workon qrl && cd $SOURCEDIR/QRL'
+alias resetqrlenv='rm -rf ~/.virtualenvs/qrl_brew && mkvirtualenv -p python3 qrl_brew'
+
+alias dockerclean='docker rm $(docker ps -a -q)'
