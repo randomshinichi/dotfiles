@@ -19,3 +19,4 @@ alias qrl='workon qrl && cd $SRCDIR/QRL'
 alias resetqrlenv='rm -rf ~/.virtualenvs/qrl_brew && mkvirtualenv -p python3 qrl_brew'
 
 alias dockerclean='docker rm $(docker ps -a -q)'
+alias dockerimageclean='docker rmi $(docker images -f dangling=true -q)'
