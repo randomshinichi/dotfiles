@@ -14,8 +14,6 @@ alias rankshaper='cd $SRCDIR/rankshaper && workon rankshaper'
 alias mkmig='./manage.py makemigrations && ./manage.py migrate'
 alias rmmigrations='rm pr9seotool/apps/website/migrations/0*.py'
 
-alias rmqrl='rm -rf ~/.qrl/data'
-alias qrl='workon qrl && cd $SRCDIR/QRL'
-alias resetqrlenv='rm -rf ~/.virtualenvs/qrl_brew && mkvirtualenv -p python3 qrl_brew'
-
 alias dockerclean='docker rm $(docker ps -a -q)'
+
+alias loadnvm='[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' # This loads nvm
