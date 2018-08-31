@@ -26,6 +26,9 @@
 ;; emacs GUI toolbar is useless
 (tool-bar-mode -1)
 
+;; turn on line wrap by default
+(global-visual-line-mode t)
+
 ;; put backups elsewhere
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 
@@ -40,14 +43,19 @@
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
 (global-set-key (kbd "<f6>") 'org-capture)
+(setq org-log-done t)
 (setq org-todo-keywords
-  '((sequence "TODO" "WAIT" "|" "DONE" "DELEGATED")))
+      '((sequence "TODO" "WAIT" "|" "DONE" "DELEGATED")))
+;; (setq org-startup-indented t)
 (setq org-capture-templates
       '(
 	("d" "dance.org" plain (file "~/Dropbox/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
-	("f" "food.org" plain (file "~/Dropbox/org/food.org") "* %u\n%?" :empty-lines-before 1)
+	("f" "food.org" plain (file+datetree "~/Dropbox/org/food.org") "%U %?")
 	)
-)
+      )
+(setq org-agenda-files (list "~/Dropbox/org/todo.org"
+			     "~/Dropbox/org/todo.org_archive"))
+
 
 ;; ido has very good completion for file opening and buffer switching
 (setq ido-enable-flex-matching t)
