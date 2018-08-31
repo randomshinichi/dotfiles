@@ -22,8 +22,8 @@ export PATH=$GOPATH/bin:$PATH
 
 alias ez='nano ~/.bash_profile && source ~/.bash_profile'
 alias grw='git commit --amend --no-edit'
-
+alias gs='git status'
 # update qrl-docker images and remove all dangling fs layers
 alias dockerqrlupdate='docker pull qrledger/qrl-docker:xenial; docker pull qrledger/qrl-docker:bionic && docker rmi $(docker images -f dangling=true -q)'
-
+alias dockerclean='docker rm $(docker ps -aq)'
 source ~/.env_secrets
