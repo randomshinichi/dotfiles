@@ -47,14 +47,23 @@
 (setq org-todo-keywords
       '((sequence "TODO" "WAIT" "|" "DONE" "DELEGATED")))
 ;; (setq org-startup-indented t)
+
+(defun hugo/new-post (path)
+  (let ((name (read-string "Blogpost Slug: ")))
+    (expand-file-name (format "%s-%s.org"
+                              (format-time-string "%Y-%m-%d")
+                              name) path)))
+
 (setq org-capture-templates
       '(
 	("d" "dance.org" plain (file "~/Dropbox/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
 	("f" "food.org" plain (file+datetree "~/Dropbox/org/food.org") "%U %?")
+	("b" "blog" plain (file (hugo/new-post  "~/source/hugoblog/content/post/")) "#+title: %?\n#+date: %<%Y-%m-%d>\n")
 	)
       )
 (setq org-agenda-files (list "~/Dropbox/org/todo.org"
 			     "~/Dropbox/org/todo.org_archive"))
+
 
 
 ;; ido has very good completion for file opening and buffer switching
