@@ -1,0 +1,124 @@
+---
+- hosts: maincomputer
+  remote_user: root
+  vars:
+    username: shinichi
+  tasks:
+    - name: Add repositories for non-standard software
+      apt_repository:
+        repo: ppa:unit193/encryption
+        state: present
+
+    - name: apt update
+      apt: update_cache=yes
+
+    - name: Install Basics
+      apt: name={{ item }} state=latest
+      with_items:
+        - ansible
+        - aptitude
+        - build-essential
+        - chromium-browser
+        - curl
+        # - dropbox  # not in standard repo!
+        - emacs
+        - exfat-fuse
+        - feh
+        - firefox
+        - git
+        - golang-go
+        - htop
+        - hugo
+        - i3
+        - iftop
+        - net-tools  # arp, ifconfig, netstat, route
+        - physlock  # the only screen locker that won't let you switch to VTs
+        - powertop
+        - printer-driver-cups-pdf  # print to pdf
+        - quodlibet  # good replacement for fb2k
+        - ranger
+        - redshift
+        - redshift-gtk
+        - scrot
+        # - veracrypt  # not in standard repo
+        - virtualenvwrapper
+        - zfsutils-linux
+
+    - name: Create {{ username }}, ensure that he can sudo
+      user:
+        name: "{{ username }}"
+        state: present
+        shell: /bin/bash
+        groups: sudo
+
+    - name: Customize keyboard Ctrl
+      # This should also work for the tty, not just X.
+      # ctrl:nocaps because sometimes Caps Lock activates silently when I’m in the lockscreen
+      # compose key is a Unix specific key that helps with inputting foreiDgn language alphabets
+      # I can’t believe ctrl-alt-backspace is optional
+      lineinfile:
+        path: /etc/default/keyboard
+        state: present
+        regexp: '^XKBOPTIONS='
+        line: 'XKBOPTIONS="lv3:ralt_switch_multikey,terminate:ctrl_alt_bksp,ctrl:nocaps"'
+      notify: "dpkg-reconfigure keyboard-configuration"
+
+    - name: Set RTC to local timezone
+      # because Windows likes it that way if you dual boot
+      shell: timedatectl set-local-rtc 1 --adjust-system-clock
+
+    - name: Customize keyboard turn PrtSc key into Menu key (X11 only)
+      # To get rid of the useless PrtSc key on the Thinkpad X230 keyboard. GDM will load ~/.Xmodmap automatically. If it were any other desktop manager I’d have to hack up a lot of scripts.
+      lineinfile:
+        path: /home/{{ username }}/.Xmodmap
+        state: present
+        create: yes
+        line: 'keycode 107 = Menu'
+      tags:
+        - dotfiles
+
+    - name: copy .xprofile to disable mouse acceleration to make Trackpoint usable
+      # ~/.xprofile (not in ~/.xinitrc because only startx executes .xinitrc)
+      # ~/.xprofile should be sourced by GDM, LightDM, LXDM, SDDM.... and if not, you should source it from ~/.xinitrc.
+      copy:
+        src: files/.xprofile
+        dest: /home/{{ username }}/.xprofile
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: 0644
+      tags:
+        - dotfiles
+
+    - name: copy .bash_profile to ~{{ username }}
+      copy:
+        src: files/.bash_profile
+        dest: /home/{{ username }}/.bash_profile
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: 0644
+      tags:
+        - dotfiles
+
+    - name: copy .emacs to ~{{ username }}
+      copy:
+        src: files/.emacs
+        dest: /home/{{ username }}/.emacs
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: 0644
+      tags:
+        - dotfiles
+
+    - name: copy i3 to ~{{ username }}/.config/
+      copy:
+        src: files/i3
+        dest: /home/{{ username }}/.config/
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: 0644
+      tags:
+        - dotfiles
+
+  handlers:
+    - name: dpkg-reconfigure keyboard-configuration
+      shell: dpkg-reconfigure keyboard-configuration

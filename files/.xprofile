@@ -1,0 +1,2 @@
+# Disable mouse acceleration to make Trackpoint usable
+xset m 0 0
