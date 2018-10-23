@@ -29,6 +29,10 @@ font pango:monospace 8
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
+# floating windows should not be larger than the screen!
+floating_minimum_size 75 x 50
+floating_maximum_size -1 x -1
+
 # start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
 
