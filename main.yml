@@ -60,7 +60,7 @@
         path: /etc/default/keyboard
         state: present
         regexp: '^XKBOPTIONS='
-        line: 'XKBOPTIONS="lv3:ralt_switch_multikey,terminate:ctrl_alt_bksp,ctrl:nocaps"'
+        line: 'XKBOPTIONS="compose:paus,terminate:ctrl_alt_bksp,ctrl:nocaps"'
       notify: "dpkg-reconfigure keyboard-configuration"
 
     - name: Set RTC to local timezone
@@ -77,15 +77,37 @@
       tags:
         - dotfiles
 
-    - name: copy .xprofile to disable mouse acceleration to make Trackpoint usable
-      # ~/.xprofile (not in ~/.xinitrc because only startx executes .xinitrc)
+    - name: xset m 0 0 in .xprofile to make Trackpoint usable
+      # ~/.xprofile (not in ~/.xinitrc because it gets overwritten by something else later)
       # ~/.xprofile should be sourced by GDM, LightDM, LXDM, SDDM.... and if not, you should source it from ~/.xinitrc.
-      copy:
-        src: files/.xprofile
-        dest: /home/{{ username }}/.xprofile
-        owner: "{{ username }}"
-        group: "{{ username }}"
-        mode: 0644
+      lineinfile:
+        path: /home/{{ username }}/.xprofile
+        line: 'xset m 0 0'
+        state: present
+        regexp: '^xset'
+        create: yes
+      tags:
+        - dotfiles
+
+    - name: .xinitrc to source .xprofile
+    # If you're using GDM, you don't need this because .xprofile will be sourced automatically.
+    # But even though LightDM is supposed to source .xprofile, it doesn't.
+      lineinfile:
+        path: /home/{{ username }}/.xinitrc
+        line: 'source ~/.xprofile'
+        state: present
+        create: yes
+      tags:
+        - dotfiles
+
+    - name: .xinitrc to run Xmodmap
+    # If you're using GDM, you don't need this because .Xmodmap will be sourced automatically.
+    # But even though LightDM is supposed to source .Xmodmap, it doesn't.
+      lineinfile:
+        path: /home/{{ username }}/.xinitrc
+        line: 'xmodmap -e ~/.Xmodmap'
+        state: present
+        create: yes
       tags:
         - dotfiles
 
@@ -145,4 +167,4 @@
 
   handlers:
     - name: dpkg-reconfigure keyboard-configuration
-      shell: dpkg-reconfigure keyboard-configuration
+      shell: dpkg-reconfigure -fnoninteractive keyboard-configuration
