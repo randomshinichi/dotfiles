@@ -1,0 +1,7 @@
+[user]
+	email = randomshinichi4869@gmail.com
+	name = Andrew Chiw
+[push]
+	default = simple
+[pull]
+	rebase = true

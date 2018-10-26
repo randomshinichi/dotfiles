@@ -109,7 +109,17 @@
       tags:
         - dotfiles
 
-    - name: copy i3 to ~{{ username }}/.config/
+    - name: copy .gitconfig to ~{{ username }}
+      copy:
+        src: files/.gitconfig
+        dest: /home/{{ username }}/.gitconfig
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: 0644
+      tags:
+        - dotfiles
+
+    - name: copy i3/ to ~{{ username }}/.config/
       copy:
         src: files/i3
         dest: /home/{{ username }}/.config/
@@ -118,6 +128,20 @@
         mode: 0644
       tags:
         - dotfiles
+
+    - name: Install utilities for i3 desktop
+      apt: name={{ item }} state=latest
+      with_items:
+        - arandr  # a GUI to configure xrandr (very useful)
+        - autorandr  # automatically switches between single/multi monitor when plugged/unplugged
+        - udiskie  # automatically mounts new disks
+
+    - name: Install tlp to manage power
+      apt: name={{ item }} state=latest
+      with_items:
+        - tlp
+        - acpi-call-dkms
+        - tp-smapi-dkms
 
   handlers:
     - name: dpkg-reconfigure keyboard-configuration
