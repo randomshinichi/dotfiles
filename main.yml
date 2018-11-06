@@ -40,6 +40,7 @@
         - redshift
         - redshift-gtk
         - scrot
+        - snapper  # for btrfs root filesystem snapshots
         # - veracrypt  # not in standard repo
         - virtualenvwrapper
         - zfsutils-linux
@@ -51,6 +52,15 @@
         shell: /bin/bash
         groups: sudo
 
+    # Validate the sudoers file before saving
+    - name: ensure that {{ username }} can sudo without a password
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^shinichi ALL='
+        line: 'shinichi ALL=(ALL) NOPASSWD: ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+
     - name: Customize keyboard Ctrl
       # This should also work for the tty, not just X.
       # ctrl:nocaps because sometimes Caps Lock activates silently when I’m in the lockscreen
@@ -60,7 +70,7 @@
         path: /etc/default/keyboard
         state: present
         regexp: '^XKBOPTIONS='
-        line: 'XKBOPTIONS="compose:paus,terminate:ctrl_alt_bksp,ctrl:nocaps"'
+        line: 'XKBOPTIONS="compose:paus,ctrl:nocaps"'
       notify: "dpkg-reconfigure keyboard-configuration"
 
     - name: Set RTC to local timezone
@@ -151,12 +161,13 @@
       tags:
         - dotfiles
 
-    - name: Install utilities for i3 desktop
+    - name: utilities for i3 desktop
       apt: name={{ item }} state=latest
       with_items:
         - arandr  # a GUI to configure xrandr (very useful)
         - autorandr  # automatically switches between single/multi monitor when plugged/unplugged
         - udiskie  # automatically mounts new disks
+        - lxappearance  # gtk engines: makes GTK apps beautiful outside of GTK environment
 
     - name: Install tlp to manage power
       apt: name={{ item }} state=latest
@@ -164,6 +175,17 @@
         - tlp
         - acpi-call-dkms
         - tp-smapi-dkms
+
+    - name: Because we're using btrfs, we have to disable SATA link power management
+      lineinfile:
+        path: /etc/default/tlp
+        regexp: '^SATA_LINKPWR_ON_BAT'
+        line: SATA_LINKPWR_ON_BAT="max_performance"
+
+    - name: snap packages
+      shell: snap install pycharm-community --classic; snap install goland --classic; snap install sublime-text --classic; snap install slack --classic; snap install discord gitkraken; 
+      tags:
+        - snap
 
   handlers:
     - name: dpkg-reconfigure keyboard-configuration

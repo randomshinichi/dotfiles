@@ -188,10 +188,12 @@ exec --no-startup-id udiskie -t
 exec --no-startup-id dropbox
 
 # Utilities: manual management of external displays, quick unmount disks
-set $mode_utils (d) DP-1 above LVDS-1, (s) LVDS-1, (e) Eject block device
+set $dp DP-1
+set $lvds LVDS-1
+set $mode_utils (d) $dp above $lvds, (s) $lvds, (e) Eject block device
 mode "$mode_utils" {
-    bindsym d exec --no-startup-id xrandr --output DP-1 --auto --above LVDS-1, mode "default"
-    bindsym s exec --no-startup-id xrandr --output DP-1 --off --output LVDS-1 --auto
+    bindsym d exec --no-startup-id xrandr --output $dp --auto --above $lvds
+    bindsym s exec --no-startup-id xrandr --output $dp --off --output $lvds --auto
     bindsym e exec i3-input -F 'exec udiskie-umount /dev/%s' -P 'Eject /dev/'
 
     # back to normal: Enter or Escape
@@ -202,12 +204,12 @@ mode "$mode_utils" {
 bindsym $mod+x mode "$mode_utils"
 
 # odd workspaces on larger monitor, even workspaces on smaller
-workspace 1 output DP-1
-workspace 3 output DP-1
-workspace 5 output DP-1
-workspace 2 output LVDS-1
-workspace 4 output LVDS-1
-workspace 6 output LVDS-1
+workspace 1 output $dp
+workspace 3 output $dp
+workspace 5 output $dp
+workspace 2 output $lvds
+workspace 4 output $lvds
+workspace 6 output $lvds
 
 # Scratchpad feature
 bindsym $mod+Shift+slash move scratchpad
@@ -215,4 +217,4 @@ bindsym $mod+slash scratchpad show
 
 # Startup applications
 exec emacs
-
+for_window [class="Emacs"] floating enable

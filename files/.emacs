@@ -150,6 +150,10 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'my/smarter-move-beginning-of-line)
 
+;; Auto open files on startup
+(find-file "~/Dropbox/org/todo.org")
+(find-file "~/Dropbox/org/computers.org")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -1,11 +1,13 @@
 # functions to switch from LVDS1 to VGA and vice versa
+DP='DP-1'
+LVDS='LVDS-1'
 function ActivateDP {
-    echo "Switching to DP-1"
-    xrandr --auto --output DP-1 --mode 1920x1080 --above LVDS-1
+    echo "Switching to $DP"
+    xrandr --auto --output $DP --auto --above $LVDS
 }
 function DeactivateDP {
-    echo "Switching to LVDS-1"
-    xrandr --output DP-1 --off --output LVDS-1 --mode 1366x768
+    echo "Switching to $LVDS"
+    xrandr --output $DP --off --output $LVDS --auto
 }
 
 function parse_git_dirty {
@@ -19,7 +21,7 @@ function dotdiff {
   diff $1 ~/source/dotfiles/files/$1
 }
 
-export PS1="\u@\h:\w \$(parse_git_branch)\$ " # shinichi@ayanami:~/source/cryptocoins [master]$
+export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$(parse_git_branch) " # shinichi@ayanami:~/source/cryptocoins [master]$
 export GOPATH=~/source/go
 export GOSRC=~/source/go/src/github.com
 export PATH=$GOPATH/bin:$PATH
@@ -30,12 +32,13 @@ export ZEPHYR_TOOLCHAIN_VARIANT="zephyr"
 alias ez='nano ~/.bash_profile && source ~/.bash_profile'
 alias grw='git commit --amend --no-edit'
 alias gs='git status'
-alias any='cd ~/source/anyledger/anyledger-backend && ls && workon anybackend'
+alias any='cd ~/source/anyledger && ls'
 
 # update qrl-docker images and remove all dangling fs layers
 alias dockerqrlupdate='docker pull qrledger/qrl-docker:xenial; docker pull qrledger/qrl-docker:bionic && docker rmi $(docker images -f dangling=true -q)'
 alias dockerclean='docker rm $(docker ps -aq)'
 
 alias zephyrninja='mkdir $ZEPHYR_ARCH && cd $ZEPHYR_ARCH && cmake -GNinja -DBOARD=$ZEPHYR_ARCH ../.. && ninja && ninja run'
+alias listinstalledpackages="comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)"
 source ~/.env_secrets
 
