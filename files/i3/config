@@ -176,7 +176,7 @@ bindcode 160 exec physlock
 bindcode 156 exec xset dpms force off
 
 # wallpaper
-exec --no-startup-id feh --bg-scale "/home/shinichi/Pictures/Sansa Stark - Aleksandra Klepacka-1366.jpg"
+exec --no-startup-id feh --bg-fill "/home/shinichi/Pictures/Simon Stalenhag/by_home4_2560.jpg"
 
 # redshift
 exec --no-startup-id redshift-gtk
@@ -184,16 +184,20 @@ exec --no-startup-id redshift-gtk
 # udiskie, an automounter with tray icon
 exec --no-startup-id udiskie -t
 
-# dropbox
-exec --no-startup-id dropbox
+# syndaemon turns off the touchpad while I'm typing.
+# turn it on 0.3s after the last keypress; ignore modifier key combos; use XRecord instead of polling
+exec --no-startup-id syndaemon -i 0.3 -K -R
 
 # Utilities: manual management of external displays, quick unmount disks
 set $dp DP-1
-set $lvds LVDS-1
-set $mode_utils (d) $dp above $lvds, (s) $lvds, (e) Eject block device
+set $lvds LVDS-1-1
+set $mode_utils (n) manual nvidia 3 monitors, (a) autorandr --change, (s) LVDS only, (e) eject block device
 mode "$mode_utils" {
-    bindsym d exec --no-startup-id xrandr --output $dp --auto --above $lvds
-    bindsym s exec --no-startup-id xrandr --output $dp --off --output $lvds --auto
+    # arandr generated this incredible xrandr command... I had nothing to do with it.
+    # n for docked mode, outputs to 3 monitors. Needs nvidia.
+    bindsym n exec --no-startup-id xrandr --output LVDS-1-1 --mode 1920x1080 --pos 0x1080 --rotate normal --output LVDS-0 --off --output VGA-1-1 --off --output DP-5 --off --output DP-4 --off --output DP-3 --off --output DP-2 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --mode 1280x1024 --pos 1920x0 --rotate normal --output DP-0 --off
+    bindsym a exec --no-startup-id autorandr --change
+    bindsym s exec --no-startup-id xrandr --output LVDS-1-1 --mode 1920x1080 --pos 0x0 --rotate normal --output LVDS-0 --off --output VGA-1-1 --off --output DP-5 --off --output DP-4 --off --output DP-3 --off --output DP-2 --off --output DP-1 --off --output DP-0 --off
     bindsym e exec i3-input -F 'exec udiskie-umount /dev/%s' -P 'Eject /dev/'
 
     # back to normal: Enter or Escape
@@ -203,13 +207,11 @@ mode "$mode_utils" {
 # Declare here the shortcut to bring the utils selection menu
 bindsym $mod+x mode "$mode_utils"
 
-# odd workspaces on larger monitor, even workspaces on smaller
-workspace 1 output $dp
-workspace 3 output $dp
-workspace 5 output $dp
-workspace 2 output $lvds
-workspace 4 output $lvds
-workspace 6 output $lvds
+# move workspaces between xrandr outputs
+bindsym $mod+Ctrl+Shift+Left move workspace to output left
+bindsym $mod+Ctrl+Shift+Right move workspace to output right
+bindsym $mod+Ctrl+Shift+Up move workspace to output up
+bindsym $mod+Ctrl+Shift+Down move workspace to output down
 
 # Scratchpad feature
 bindsym $mod+Shift+slash move scratchpad
