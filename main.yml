@@ -20,7 +20,6 @@
         - build-essential
         - chromium-browser
         - curl
-        # - dropbox  # not in standard repo!
         - emacs
         - exfat-fuse
         - feh
@@ -73,10 +72,6 @@
         line: 'XKBOPTIONS="compose:paus,ctrl:nocaps"'
       notify: "dpkg-reconfigure keyboard-configuration"
 
-    - name: Set RTC to local timezone
-      # because Windows likes it that way if you dual boot
-      shell: timedatectl set-local-rtc 1 --adjust-system-clock
-
     - name: Customize keyboard turn PrtSc key into Menu key (X11 only)
       # To get rid of the useless PrtSc key on the Thinkpad X230 keyboard. GDM will load ~/.Xmodmap automatically. If it were any other desktop manager I’d have to hack up a lot of scripts.
       lineinfile:
@@ -99,28 +94,6 @@
       tags:
         - dotfiles
 
-    - name: .xinitrc to source .xprofile
-    # If you're using GDM, you don't need this because .xprofile will be sourced automatically.
-    # But even though LightDM is supposed to source .xprofile, it doesn't.
-      lineinfile:
-        path: /home/{{ username }}/.xinitrc
-        line: 'source ~/.xprofile'
-        state: present
-        create: yes
-      tags:
-        - dotfiles
-
-    - name: .xinitrc to run Xmodmap
-    # If you're using GDM, you don't need this because .Xmodmap will be sourced automatically.
-    # But even though LightDM is supposed to source .Xmodmap, it doesn't.
-      lineinfile:
-        path: /home/{{ username }}/.xinitrc
-        line: 'xmodmap -e ~/.Xmodmap'
-        state: present
-        create: yes
-      tags:
-        - dotfiles
-
     - name: copy .bash_profile to ~{{ username }}
       copy:
         src: files/.bash_profile
@@ -128,6 +101,14 @@
         owner: "{{ username }}"
         group: "{{ username }}"
         mode: 0644
+      tags:
+        - dotfiles
+
+    - name: .bashrc should source .bash_profile
+      lineinfile:
+        path: /home/{{username}}/.bashrc
+        state: present
+        line: 'source ~/.bash_profile'
       tags:
         - dotfiles
 
@@ -175,6 +156,16 @@
         - tlp
         - acpi-call-dkms
         - tp-smapi-dkms
+      tags: tlp
+
+    - name: tlp set battery thresholds
+      blockinfile:
+        path: /etc/default/tlp
+        block: |
+            START_CHARGE_THRESH_BAT0=70
+            STOP_CHARGE_THRESH_BAT0=75
+        insertafter: '# Main / Internal battery \(values in \%\)'
+      tags: tlp
 
     - name: Because we're using btrfs, we have to disable SATA link power management
       lineinfile:
@@ -183,7 +174,7 @@
         line: SATA_LINKPWR_ON_BAT="max_performance"
 
     - name: snap packages
-      shell: snap install pycharm-community --classic; snap install goland --classic; snap install sublime-text --classic; snap install slack --classic; snap install discord gitkraken; 
+      shell: snap install pycharm-community --classic; snap install goland --classic; snap install sublime-text --classic
       tags:
         - snap
 
