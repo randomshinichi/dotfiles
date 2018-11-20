@@ -11,18 +11,18 @@ diff $1 ~/source/dotfiles/files/$1
 
 function nv_disable {
 sudo bash << EOF
-systemctl stop lightdm
+systemctl stop gdm
 rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia
 echo OFF >> /proc/acpi/bbswitch
 cat /proc/acpi/bbswitch
-systemctl start lightdm
+systemctl start gdm
 EOF
 }
 
 function nv_enable {
 sudo bash << EOF
 modprobe nvidia
-systemctl restart lightdm
+systemctl restart gdm
 EOF
 }
 
@@ -44,4 +44,5 @@ alias dockerclean='docker rm $(docker ps -aq)'
 
 alias zephyrninja='mkdir $ZEPHYR_ARCH && cd $ZEPHYR_ARCH && cmake -GNinja -DBOARD=$ZEPHYR_ARCH ../.. && ninja && ninja run'
 alias listinstalledpackages="comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)"
+alias findpackage='dpkg -S'
 source ~/.env_secrets

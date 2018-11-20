@@ -15,5 +15,5 @@ Other significant dots in home:
 ```
 
 ```
-tar cvjpf source.tbz2 --exclude source/go source/ && tar cvjpf dotfiles.tbz2 .env_secrets .electrum/ .GoLand2018.2/ .PyCharmCE2018.2/ .minecraft/ .mozilla/ .quodlibet/ .ssh/ snap/
+tar cvjpf home.tbz2 .env_secrets .electrum/ .PyCharmCE2018.2/ .minecraft/ .mozilla/ .quodlibet/ .ssh/ Downloads/ Dropbox/ snap/ source/ --exclude source/go
  ```
