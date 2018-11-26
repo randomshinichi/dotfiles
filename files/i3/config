@@ -191,13 +191,14 @@ exec --no-startup-id syndaemon -i 0.3 -K -R
 # Utilities: manual management of external displays, quick unmount disks
 set $dp DP-1
 set $lvds LVDS-1-1
-set $mode_utils (n) manual nvidia 3 monitors, (a) autorandr --change, (s) LVDS only, (e) eject block device
+set $mode_utils (n) nvidia 3 monitors, (m) nouveau 3 monitors, (a) autorandr --change, (s) LVDS only, (e) eject block device
 mode "$mode_utils" {
     # arandr generated this incredible xrandr command... I had nothing to do with it.
     # n for docked mode, outputs to 3 monitors. Needs nvidia.
     bindsym n exec --no-startup-id xrandr --output LVDS-1-1 --mode 1920x1080 --pos 0x1080 --rotate normal --output LVDS-0 --off --output VGA-1-1 --off --output DP-5 --off --output DP-4 --off --output DP-3 --off --output DP-2 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --mode 1280x1024 --pos 1920x0 --rotate normal --output DP-0 --off
+    bindsym m exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output VGA-1-2 --off --output DP-1-3 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1-2 --mode 1280x1024 --pos 1920x0 --rotate normal --output DP-1-1 --off
     bindsym a exec --no-startup-id autorandr --change
-    bindsym s exec --no-startup-id xrandr --output LVDS-1-1 --mode 1920x1080 --pos 0x0 --rotate normal --output LVDS-0 --off --output VGA-1-1 --off --output DP-5 --off --output DP-4 --off --output DP-3 --off --output DP-2 --off --output DP-1 --off --output DP-0 --off
+    bindsym s exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output VGA-1-2 --off --output DP-1-3 --off --output DP-1-2 --off --output DP-1-1 --off
     bindsym e exec i3-input -F 'exec udiskie-umount /dev/%s' -P 'Eject /dev/'
 
     # back to normal: Enter or Escape

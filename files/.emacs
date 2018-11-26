@@ -118,7 +118,10 @@
    (interactive "*p")
    (move-text-internal (- arg)))
 
-; Alt-Shift-arrow keys
+;; Enable shift selecting even in .org files
+(setq org-support-shift-select t)
+
+;; Alt-Shift-arrow keys
 (global-set-key [\M-\S-down] 'move-text-down)
 (global-set-key [\M-\S-up] 'move-text-up)
 
