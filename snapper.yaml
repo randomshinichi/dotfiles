@@ -1,8 +1,13 @@
 - hosts: maincomputer
   remote_user: root
   tasks:
-    # - name: create snapper config 'root' for /
-    #   shell: snapper -c root create-config /
+    - name: install snapper
+      apt:
+        name: snapper
+        state: latest
+
+    - name: create snapper config 'root' for /
+      shell: snapper -c root create-config /
 
     - name: configure snapper's hourly snapshots
       lineinfile:

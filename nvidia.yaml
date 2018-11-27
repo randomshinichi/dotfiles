@@ -8,4 +8,4 @@
       apt: name={{ item }} state=present
       with_items:
         - nvidia-driver-390
-        - nvidia-prime  # Ubuntu's useful scripts for switching between graphics
+        - nvidia-prime  # Ubuntu's useful scripts for switching between intel/nouveau and nvidia

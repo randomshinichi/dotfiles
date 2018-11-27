@@ -1,0 +1,37 @@
+# For software that I might not need in the future, but requires too much setup
+---
+- hosts: maincomputer
+  remote_user: root
+  vars:
+    username: shinichi
+  tasks:
+    - name: Add repositories for non-standard software
+      apt_repository: repo={{ item }} state=present 
+      with_items:
+        - ppa:papirus/papirus # Papirus Icons
+        - ppa:tista/adapta # Adapta GTK theme
+
+    - name: Install software
+      apt: name={{ item }} state=latest
+      with_items:
+      - adapta-gtk-theme
+      - papirus-icon-theme
+
+    - name: Install docker
+      apt: name={{ item }} state=latest
+      with_items:
+      - docker-compose
+      - docker.io
+      tags: docker
+
+    - name: add shinichi to docker group
+      user:
+        name: shinichi
+        groups: docker
+        append: yes
+      tags: docker
+
+    - name: download Minecraft
+      apt: 
+        deb: https://launcher.mojang.com/download/Minecraft.deb
+        state: present
