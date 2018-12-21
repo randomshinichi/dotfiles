@@ -56,20 +56,33 @@
 
 (setq org-capture-templates
       '(
-	("d" "dance.org" plain (file "~/Dropbox/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
-	("f" "food.org" plain (file+datetree "~/Dropbox/org/food.org") "%U %?")
+	("d" "dance.org" plain (file "~/Documents/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
+	("f" "food.org" plain (file+datetree "~/Documents/org/food.org") "%U %?")
 	("b" "blog" plain (file (hugo/new-post  "~/source/hugoblog/content/post/")) "#+title: %?\n#+date: %<%Y-%m-%d>\n")
 	)
       )
-(setq org-agenda-files (list "~/Dropbox/org/todo.org"
-			     "~/Dropbox/org/todo.org_archive"))
+(setq org-agenda-files (list "~/Documents/org/todo.org"
+			     "~/Documents/org/todo.org_archive"))
 
 
 
-;; ido has very good completion for file opening and buffer switching
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
-(ido-mode 1)
+;; HELM not only has fuzzy searches but has helm-M-x which is way better than ido
+(setq helm-net-prefer-curl t
+      helm-split-window-in-side-p t
+      helm-buffers-fuzzy-matching t
+      helm-move-to-line-cycle-in-source t
+      ; workaround
+      helm-follow-mode nil)
+
+(global-set-key (kbd "C-c h") 'helm-command-prefix)
+(global-unset-key (kbd "C-x c"))
+
+(helm-mode t)
+(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "M-y") 'helm-show-kill-ring)
+(global-set-key (kbd "C-x b") 'helm-mini)
+(global-set-key (kbd "C-x C-b") 'helm-buffers-list)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 ;; Page down/up move the point, not the screen.
 ;; In practice, this means that they can move the
@@ -116,14 +129,20 @@
    "Move region (transient-mark-mode active) or current line
   arg lines up."
    (interactive "*p")
-   (move-text-internal (- arg)))
+(move-text-internal (- arg)))
+
+(global-set-key (kbd "<C-S-up>")
+                'move-line-up)
+
+(global-set-key (kbd "<C-S-down>")
+                'move-line-down)
 
 ;; Enable shift selecting even in .org files
 (setq org-support-shift-select t)
 
 ;; Alt-Shift-arrow keys
-(global-set-key [\M-\S-down] 'move-text-down)
-(global-set-key [\M-\S-up] 'move-text-up)
+(global-set-key (kbd "<C-S-down>") 'move-text-down)
+(global-set-key (kbd "<C-S-up>") 'move-text-up)
 
 ;; Smarter Home (ignores indentation whitespace)
 (defun my/smarter-move-beginning-of-line (arg)
@@ -153,9 +172,21 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'my/smarter-move-beginning-of-line)
 
+;; Find auto-wraps if it didn't find anything
+(defadvice isearch-repeat (after isearch-no-fail activate)
+  (unless isearch-success
+    (ad-disable-advice 'isearch-repeat 'after 'isearch-no-fail)
+    (ad-activate 'isearch-repeat)
+    (isearch-repeat (if isearch-forward 'forward))
+    (ad-enable-advice 'isearch-repeat 'after 'isearch-no-fail)
+    (ad-activate 'isearch-repeat)))
+(global-set-key (kbd "<C-s>") 'isearch-repeat)
+
 ;; Auto open files on startup
-(find-file "~/Dropbox/org/todo.org")
-(find-file "~/Dropbox/org/computers.org")
+(save-excursion
+  (find-file "~/Documents/org/todo.org")
+  (find-file "~/Documents/org/others/computers.org")
+  (find-file "~/Documents/org/others/bosch.org"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -171,7 +202,7 @@ point reaches the beginning or end of the buffer, stop there."
    (quote
     ("4aee8551b53a43a883cb0b7f3255d6859d766b6c5e14bcb01bed572fcbef4328" "4cf3221feff536e2b3385209e9b9dc4c2e0818a69a1cdb4b522756bcdf4e00a4" default)))
  '(fci-rule-color "#eee8d5")
- '(package-selected-packages (quote (color-theme-sanityinc-solarized use-package)))
+ '(package-selected-packages (quote (helm color-theme-sanityinc-solarized use-package)))
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
    (quote
