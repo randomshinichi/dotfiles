@@ -9,21 +9,13 @@ function dotdiff {
 diff $1 ~/source/dotfiles/files/$1
 }
 
-function nv_disable {
-sudo bash << EOF
-systemctl stop gdm
-rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia
-echo OFF >> /proc/acpi/bbswitch
-cat /proc/acpi/bbswitch
-systemctl start gdm
-EOF
-}
-
-function nv_enable {
-sudo bash << EOF
-modprobe nvidia
-systemctl restart gdm
-EOF
+# This function needed because gnome-terminal doesn't let you GUI rename!
+function set-title() {
+  if [[ -z "$ORIG" ]]; then
+    ORIG=$PS1
+  fi
+  TITLE="\[\e]2;$*\a\]"
+  PS1=${ORIG}${TITLE}
 }
 
 export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$(parse_git_branch) " # shinichi@ayanami:~/source/cryptocoins [master]$
@@ -36,10 +28,11 @@ export ZEPHYR_TOOLCHAIN_VARIANT="zephyr"
 alias ez='nano ~/.bash_profile && source ~/.bash_profile'
 alias grw='git commit --amend --no-edit'
 alias gs='git status'
+alias gcm='git commit -m'
 alias any='cd ~/source/anyledger && ls'
+alias ae='cd ~/source/aeternity && ls'
+alias battery='cat /sys/class/power_supply/BAT0/uevent'
 
-# update qrl-docker images and remove all dangling fs layers
-alias dockerqrlupdate='docker pull qrledger/qrl-docker:xenial; docker pull qrledger/qrl-docker:bionic && docker rmi $(docker images -f dangling=true -q)'
 alias dockerclean='docker rm $(docker ps -aq)'
 
 alias zephyrninja='mkdir $ZEPHYR_ARCH && cd $ZEPHYR_ARCH && cmake -GNinja -DBOARD=$ZEPHYR_ARCH ../.. && ninja && ninja run'
