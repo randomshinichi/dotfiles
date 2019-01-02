@@ -4,7 +4,7 @@
                     (not (gnutls-available-p))))
        (proto (if no-ssl "http" "https")))
   ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
-  ;;(add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
   (add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
@@ -23,20 +23,42 @@
 ;; yes or no prompt -> y or n
 (fset 'yes-or-no-p 'y-or-n-p)
 
+;; don't show Emacs splash screen anymore
+(setq inhibit-splash-screen t)
+
 ;; emacs GUI toolbar is useless
 (tool-bar-mode -1)
 
 ;; turn on line wrap by default
 (global-visual-line-mode t)
 
+;; overwrite selected text
+(delete-selection-mode t)
+
 ;; put backups elsewhere
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 
-;; which-mode
+; which-mode
 (use-package which-key)
 (require 'which-key)
 (which-key-mode)
-(which-key-setup-side-window-right)
+(which-key-setup-side-window-right-bottom)
+
+;; spacemacs theme
+;; from http://pragmaticemacs.com/emacs/get-that-spacemacs-look-without-spacemacs/
+;; but without his customizations
+(use-package spacemacs-theme
+  :defer t
+  :init (load-theme 'spacemacs-dark t))
+
+;; really nice modeline from spacemacs
+(use-package spaceline
+  :demand t
+  :init
+  (setq powerline-default-separator 'arrow-fade)
+  :config
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme))
 
 ;; org-mode settings
 (require 'org)
@@ -67,6 +89,7 @@
 
 
 ;; HELM not only has fuzzy searches but has helm-M-x which is way better than ido
+(use-package helm)
 (setq helm-net-prefer-curl t
       helm-split-window-in-side-p t
       helm-buffers-fuzzy-matching t
@@ -83,6 +106,7 @@
 (global-set-key (kbd "C-x b") 'helm-mini)
 (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
+(global-set-key (kbd "C-o") 'helm-find-files)
 
 ;; Page down/up move the point, not the screen.
 ;; In practice, this means that they can move the
@@ -129,7 +153,7 @@
    "Move region (transient-mark-mode active) or current line
   arg lines up."
    (interactive "*p")
-(move-text-internal (- arg)))
+   (move-text-internal (- arg)))
 
 (global-set-key (kbd "<C-S-up>")
                 'move-line-up)
@@ -172,6 +196,14 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'my/smarter-move-beginning-of-line)
 
+;; Make C-Tab switch between buffers. org-mode uses Ctrl-Tab too but this doesn't interfere with normal Tab
+(global-set-key (kbd "<C-tab>") 'helm-mini)
+(define-key org-mode-map (kbd "<C-tab>") 'helm-mini) ; needs to be after require 'org
+
+;; undo-tree (C-x u to run undo-tree-visualize)
+(use-package undo-tree)
+(global-undo-tree-mode 1)
+
 ;; Find auto-wraps if it didn't find anything
 (defadvice isearch-repeat (after isearch-no-fail activate)
   (unless isearch-success
@@ -184,47 +216,17 @@ point reaches the beginning or end of the buffer, stop there."
 
 ;; Auto open files on startup
 (save-excursion
-  (find-file "~/Documents/org/todo.org")
   (find-file "~/Documents/org/others/computers.org")
   (find-file "~/Documents/org/others/bosch.org"))
-
+  (find-file "~/Documents/org/todo.org")
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default bold shadow italic underline bold bold-italic bold])
- '(ansi-color-names-vector
-   (vector "#657b83" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#fdf6e3"))
- '(custom-enabled-themes (quote (tsdh-dark)))
- '(custom-safe-themes
+ '(package-selected-packages
    (quote
-    ("4aee8551b53a43a883cb0b7f3255d6859d766b6c5e14bcb01bed572fcbef4328" "4cf3221feff536e2b3385209e9b9dc4c2e0818a69a1cdb4b522756bcdf4e00a4" default)))
- '(fci-rule-color "#eee8d5")
- '(package-selected-packages (quote (helm color-theme-sanityinc-solarized use-package)))
- '(vc-annotate-background nil)
- '(vc-annotate-color-map
-   (quote
-    ((20 . "#dc322f")
-     (40 . "#cb4b16")
-     (60 . "#b58900")
-     (80 . "#859900")
-     (100 . "#2aa198")
-     (120 . "#268bd2")
-     (140 . "#d33682")
-     (160 . "#6c71c4")
-     (180 . "#dc322f")
-     (200 . "#cb4b16")
-     (220 . "#b58900")
-     (240 . "#859900")
-     (260 . "#2aa198")
-     (280 . "#268bd2")
-     (300 . "#d33682")
-     (320 . "#6c71c4")
-     (340 . "#dc322f")
-     (360 . "#cb4b16"))))
- '(vc-annotate-very-old-color nil))
+    (undo-tree helm spaceline which-key use-package spacemacs-theme))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
