@@ -32,7 +32,10 @@
         - htop
         - hugo
         - i3
+        - ideviceinstaller  # for managing iPhone apps
         - iftop
+        - ifuse  # to mount iPhone app directories, USB Mass Storage
+        - libimobiledevice-utils  # idevice_id, ideviceinfo, idevicepair (low level iOS utils)
         - net-tools  # arp, ifconfig, netstat, route
         - physlock  # the only screen locker that won't let you switch to VTs
         - powertop

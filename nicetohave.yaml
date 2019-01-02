@@ -15,6 +15,7 @@
       apt: name={{ item }} state=latest
       with_items:
       - adapta-gtk-theme
+      - calibre
       - papirus-icon-theme
 
     - name: Install docker
