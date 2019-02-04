@@ -36,8 +36,12 @@ floating_maximum_size -1 x -1
 # start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
 
+# quick shortcuts for firefox, nautilus
+bindsym $mod+F1 exec firefox
+bindsym $mod+F3 exec nautilus
+
 # kill focused window
-bindsym $mod+Shift+q kill
+bindsym Mod1+F4 kill
 
 # start dmenu (a program launcher) with Alt-F2
 bindsym Mod1+F2 exec dmenu_run
@@ -164,10 +168,17 @@ bar {
 focus_follows_mouse no
 
 # Thinkpad audio keys
-bindcode 121 exec amixer -D pulse sset Master toggle
-bindcode 122 exec amixer sset Master 5-
-bindcode 123 exec amixer sset Master 5+
-bindcode 198 exec amixer sset Mic toggle
+bindcode 121 exec pamixer -t
+bindcode 122 exec pamixer -d 10
+bindcode 123 exec pamixer -i 10
+bindcode 198 exec quodlibet --run  # --run starts quodlibet only if no existing process exists
+bindcode 173 exec --no-startup-id quodlibet --previous
+bindcode 172 exec --no-startup-id quodlibet --play-pause
+bindcode 171 exec --no-startup-id quodlibet --next
+
+# Brightness controls
+bindcode 232 exec --no-startup-id xbacklight -dec 20
+bindcode 233 exec --no-startup-id xbacklight -inc 20
 
 # Fn-F3 to screen lock
 bindcode 160 exec physlock
@@ -176,7 +187,7 @@ bindcode 160 exec physlock
 bindcode 156 exec xset dpms force off
 
 # wallpaper
-exec --no-startup-id feh --bg-fill "/home/shinichi/Pictures/Simon Stalenhag/by_home4_2560.jpg"
+exec_always --no-startup-id feh --bg-fill "/home/shinichi/Pictures/Simon Stalenhag/peripheral1_1920.jpg" # always runs when you restart i3
 
 # redshift
 exec --no-startup-id redshift-gtk
@@ -191,16 +202,17 @@ exec --no-startup-id syndaemon -i 0.3 -K -R
 # Utilities: manual management of external displays, quick unmount disks
 set $dp DP-1
 set $lvds LVDS-1-1
-set $mode_utils (n) nouveau 3 monitors, (d) docked-double, (a) apeunit DP-1 (s) LVDS only, (e) eject block device, (p) screenshot to ~
+set $mode_utils (3) docked 3 monitors, (2) docked 2 monitors, (d) DP-1 and LVDS, (s) LVDS only, (e) eject block device, (p) screenshot to ~, (o) screenshot area to ~
 mode "$mode_utils" {
     # arandr generated this incredible xrandr command... I had nothing to do with it.
     # n for docked mode, outputs to 3 monitors. Needs nvidia.
-    bindsym n exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output VGA-1-2 --off --output DP-1-3 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1-2 --mode 1280x1024 --pos 1920x0 --rotate normal --output DP-1-1 --off
-    bindsym d exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output VGA-1-2 --off --output DP-1-3 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1-2 --off --output DP-1-1 --off
+    bindsym 3 exec --no-startup-id xrandr --output VIRTUAL1 --off --output LVDS-1-2 --off --output VGA-1-2 --off --output LVDS1 --mode 1920x1080 --pos 0x1080 --rotate normal --output DP-1-3 --mode 1920x1080 --pos 1144x0 --rotate normal --output DP-1-2 --mode 1280x1024 --pos 3064x0 --rotate normal --output DP-1-1 --off --output VGA1 --off
+    bindsym 2 exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output VGA-1-2 --off --output DP-1-3 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1-2 --off --output DP-1-1 --off
+    bindsym d exec --no-startup-id xrandr --output VIRTUAL1 --off --output LVDS-1-2 --off --output VGA-1-2 --off --output LVDS1 --primary --mode 1920x1080 --pos 312x1440 --rotate normal --output DP-1-3 --off --output DP-1-2 --off --output DP-1-1 --mode 2560x1440 --pos 0x0 --rotate normal --output VGA1 --off
     bindsym s exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output VGA-1-2 --off --output DP-1-3 --off --output DP-1-2 --off --output DP-1-1 --off
-    bindsym a exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 2560x872 --rotate normal --output VGA-1-2 --off --output DP-1-3 --off --output DP-1-2 --off --output DP-1-1 --mode 2560x1440 --pos 0x0 --rotate normal
     bindsym e exec i3-input -F 'exec udiskie-umount /dev/%s' -P 'Eject /dev/'
     bindsym p exec --no-startup-id scrot -e 'mv $f ~'
+    bindsym --release o exec --no-startup-id import ~/screenshot.png  # release is needed for import to grab the key here
     # back to normal: Enter or Escape
     bindsym Return mode "default"
     bindsym Escape mode "default"
@@ -220,8 +232,13 @@ bindsym $mod+slash scratchpad show
 
 # Startup applications
 exec emacs
-for_window [class="Emacs"] floating enable
+
+# WM rules for certain programs (find their class names with xprop)
+for_window [class="Emacs"] floating enable sticky enable  # sticky makes it stick on the screen even when I change workspaces - it will only disappear when I toggle the scratchpad
 for_window [class="Anki"] floating enable
 for_window [class="calendar"] floating enable
-for_window [class="(?i)nautilus"] floating enable # (?i) case insensitive
+#for_window [class="(?i)nautilus"] floating enable # (?i) case insensitive
 for_window [class="(?i)arandr"] floating enable
+for_window [class="(?i)blueman-manager"] floating enable
+
+assign [class="Quodlibet"] 9

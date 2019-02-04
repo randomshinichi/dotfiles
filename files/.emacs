@@ -20,6 +20,12 @@
 (setq use-package-always-ensure t)
 (require 'use-package)
 
+(setq ergoemacs-theme nil)
+(setq ergoemacs-keyboard-layout "us")
+(use-package ergoemacs-mode)
+(require 'ergoemacs-mode)
+(ergoemacs-mode 1)
+
 ;; yes or no prompt -> y or n
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -37,6 +43,12 @@
 
 ;; put backups elsewhere
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+
+;; multiple cursors
+(use-package ergoemacs-mode)
+(require 'multiple-cursors)
+(global-set-key (kbd "<M-S-down>") 'mc/mark-next-like-this)
+(global-set-key (kbd "<M-S-up>") 'mc/mark-previous-like-this)
 
 ; which-mode
 (use-package which-key)
@@ -60,6 +72,7 @@
   (require 'spaceline-config)
   (spaceline-spacemacs-theme))
 
+
 ;; org-mode settings
 (require 'org)
 (define-key global-map "\C-cl" 'org-store-link)
@@ -68,25 +81,16 @@
 (setq org-log-done t)
 (setq org-todo-keywords
       '((sequence "TODO" "WAIT" "|" "DONE" "DELEGATED")))
-;; (setq org-startup-indented t)
-
-(defun hugo/new-post (path)
-  (let ((name (read-string "Blogpost Slug: ")))
-    (expand-file-name (format "%s-%s.org"
-                              (format-time-string "%Y-%m-%d")
-                              name) path)))
-
+;; when using org-babel-examplize-region, ALWAYS use #+begin_example instead of : (by default it will only do that if you're examplifying > 10 lines
+(setq org-babel-min-lines-for-block-output 0)
 (setq org-capture-templates
       '(
 	("d" "dance.org" plain (file "~/Documents/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
 	("f" "food.org" plain (file+datetree "~/Documents/org/food.org") "%U %?")
-	("b" "blog" plain (file (hugo/new-post  "~/source/hugoblog/content/post/")) "#+title: %?\n#+date: %<%Y-%m-%d>\n")
 	)
       )
 (setq org-agenda-files (list "~/Documents/org/todo.org"
 			     "~/Documents/org/todo.org_archive"))
-
-
 
 ;; HELM not only has fuzzy searches but has helm-M-x which is way better than ido
 (use-package helm)
@@ -96,17 +100,11 @@
       helm-move-to-line-cycle-in-source t
       ; workaround
       helm-follow-mode nil)
-
-(global-set-key (kbd "C-c h") 'helm-command-prefix)
-(global-unset-key (kbd "C-x c"))
-
 (helm-mode t)
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 (global-set-key (kbd "C-x b") 'helm-mini)
 (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
-(global-set-key (kbd "C-o") 'helm-find-files)
 
 ;; Page down/up move the point, not the screen.
 ;; In practice, this means that they can move the
@@ -120,7 +118,6 @@
   (lambda () (interactive)
     (condition-case nil (scroll-down)
       (beginning-of-buffer (goto-char (point-min))))))
-
 
 (defun move-text-internal (arg)
    (cond
@@ -192,7 +189,7 @@ point reaches the beginning or end of the buffer, stop there."
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
 
-;; remap C-a to `smarter-move-beginning-of-line'
+;; remap Home to `smarter-move-beginning-of-line'
 (global-set-key [remap move-beginning-of-line]
                 'my/smarter-move-beginning-of-line)
 
@@ -212,24 +209,8 @@ point reaches the beginning or end of the buffer, stop there."
     (isearch-repeat (if isearch-forward 'forward))
     (ad-enable-advice 'isearch-repeat 'after 'isearch-no-fail)
     (ad-activate 'isearch-repeat)))
-(global-set-key (kbd "<C-s>") 'isearch-repeat)
+(define-key (current-global-map) [remap isearch-repeat] 'isearch-repeat)
 
 ;; Auto open files on startup
-(save-excursion
-  (find-file "~/Documents/org/others/computers.org")
-  (find-file "~/Documents/org/others/bosch.org"))
-  (find-file "~/Documents/org/todo.org")
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (undo-tree helm spaceline which-key use-package spacemacs-theme))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+(find-file "~/Documents/org/others/computers.org")
+(find-file "~/Documents/org/todo.org")
