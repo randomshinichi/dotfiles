@@ -5,10 +5,6 @@ function parse_git_branch {
 git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/[\1$(parse_git_dirty)]/"
 }
 
-function dotdiff {
-diff $1 ~/source/dotfiles/files/$1
-}
-
 function encode_m4a {
 for file in "$@"
 do
@@ -16,14 +12,15 @@ do
 done
 }
 
+# Like Spotlight. But, it might not list every file because it uses mlocate. Also doesn't work well with sudo.
 function o {
 FILEORDIR="$(locate "$@" | fzf)"
 
-if [ -f $FILEORDIR ]
+if [ -f "$FILEORDIR" ]
 then
-    rifle $FILEORDIR
+    rifle "$FILEORDIR"
 else
-    cd $FILEORDIR
+    cd "$FILEORDIR"
 fi
 }
 
