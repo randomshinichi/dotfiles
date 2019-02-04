@@ -5,24 +5,11 @@
   vars:
     username: shinichi
   tasks:
-    - name: Add repositories for non-standard software
-      apt_repository: repo={{ item }} state=present 
-      with_items:
-        - ppa:papirus/papirus # Papirus Icons
-        - ppa:tista/adapta # Adapta GTK theme
-
-    - name: Install software
-      apt: name={{ item }} state=latest
-      with_items:
-      - adapta-gtk-theme
-      - calibre
-      - papirus-icon-theme
-
     - name: Install docker
-      apt: name={{ item }} state=latest
+      pacman: name={{ item }} state=latest
       with_items:
+      - docker
       - docker-compose
-      - docker.io
       tags: docker
 
     - name: add shinichi to docker group
@@ -31,8 +18,3 @@
         groups: docker
         append: yes
       tags: docker
-
-    - name: download Minecraft
-      apt: 
-        deb: https://launcher.mojang.com/download/Minecraft.deb
-        state: present

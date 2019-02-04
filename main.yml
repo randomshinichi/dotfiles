@@ -4,31 +4,24 @@
   vars:
     username: shinichi
   tasks:
-    - name: Add repositories for non-standard software
-      apt_repository: repo={{ item }} state=present 
-      with_items:
-        - ppa:unit193/encryption # veracrypt
-        - ppa:elementary-os/stable # for bookworm dependencies
-        - ppa:bookworm-team/bookworm
-
-    - name: apt update
-      apt: update_cache=yes
+    - name: pacman -Syu
+      pacman: 
+        update_cache: yes
+        upgrade: yes
 
     - name: Install Basics
-      apt: name={{ item }} state=latest
+      pacman: name={{ item }} state=latest
       with_items:
         - ansible
-        - aptitude
-        - build-essential
+        - anki
         - bookworm
-        - chromium-browser
-        - curl
+        - chromium
+        - code  # OSS version of Visual Studio Code
+        - cups-pdf  # print to pdf
         - emacs
-        - exfat-fuse
         - feh
         - firefox
-        - git
-        - golang-go
+        - go
         - htop
         - hugo
         - i3
@@ -36,19 +29,19 @@
         - iftop
         - ifuse  # to mount iPhone app directories, USB Mass Storage
         - libimobiledevice-utils  # idevice_id, ideviceinfo, idevicepair (low level iOS utils)
-        - net-tools  # arp, ifconfig, netstat, route
+        - mlocate
+        - pamixer  # use pamixer instead of amixer to set volume on Manjaro/Arch
         - physlock  # the only screen locker that won't let you switch to VTs
         - powertop
-        - printer-driver-cups-pdf  # print to pdf
         - quodlibet  # good replacement for fb2k
         - ranger
         - redshift
         - redshift-gtk
         - scrot
-        - snapper  # for btrfs root filesystem snapshots
-        - veracrypt  # not in standard repo
+        - syncthing
+        - veracrypt
         - virtualenvwrapper
-        - zfsutils-linux
+        - zfs-utils  # need to install linux***-zfs/spl to actually get zfs working thogh
 
     - name: Create {{ username }}, ensure that he can sudo
       user:
@@ -66,17 +59,15 @@
         line: 'shinichi ALL=(ALL) NOPASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
 
-    - name: Customize keyboard Ctrl
-      # This should also work for the tty, not just X.
+    - name: Customize keyboard Ctrl in X11
       # ctrl:nocaps because sometimes Caps Lock activates silently when I’m in the lockscreen
-      # compose key is a Unix specific key that helps with inputting foreiDgn language alphabets
+      # compose key is a Unix specific key that helps with inputting foreign language alphabets
       # I can’t believe ctrl-alt-backspace is optional
       lineinfile:
         path: /etc/default/keyboard
         state: present
-        regexp: '^XKBOPTIONS='
-        line: 'XKBOPTIONS="compose:paus,ctrl:nocaps"'
-      notify: "dpkg-reconfigure keyboard-configuration"
+        regexp: 'Option "XkbOptions"'
+        line: 'Option "XkbOptions" "compose:paus,terminate:ctrl_alt_bksp,ctrl:nocaps"'
 
     - name: Customize keyboard turn PrtSc key into Menu key (X11 only)
       # To get rid of the useless PrtSc key on the Thinkpad X230 keyboard. GDM will load ~/.Xmodmap automatically. If it were any other desktop manager I’d have to hack up a lot of scripts.
@@ -157,11 +148,10 @@
         - lxappearance  # gtk engines: makes GTK apps beautiful outside of GTK environment
 
     - name: Install tlp to manage power
-      apt: name={{ item }} state=latest
+      pacman: name={{ item }} state=latest
       with_items:
         - tlp
-        - acpi-call-dkms
-        - tp-smapi-dkms
+        - acpi_call
       tags: tlp
 
     - name: tlp set battery thresholds
@@ -173,17 +163,9 @@
         insertafter: '# Main / Internal battery \(values in \%\)'
       tags: tlp
 
-    - name: Because we're using btrfs, we have to disable SATA link power management
-      lineinfile:
-        path: /etc/default/tlp
-        regexp: '^SATA_LINKPWR_ON_BAT'
-        line: SATA_LINKPWR_ON_BAT="max_performance"
-
-    - name: snap packages
-      shell: snap install sublime-text --classic
-      tags:
-        - snap
-
-  handlers:
-    - name: dpkg-reconfigure keyboard-configuration
-      shell: dpkg-reconfigure -fnoninteractive keyboard-configuration
+    - name: enable service tlp, tlp-sleep and ensure it is not masked
+      systemd: name={{ item }} enabled=yes
+        with_items:
+         - tlp
+         - tlp-sleep
+      tags: tlp
