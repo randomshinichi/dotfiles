@@ -1,1 +1,2 @@
-tar cvjpf home.tbz2 .env_secrets .config/syncthing .config/chromium .minecraft/ .mozilla/ .quodlibet/ .ssh/  Downloads/ Dropbox/ snap/ source/ --exclude source/go
+sudo tar cvjpf wifi.tbz2 /etc/NetworkManager/system-connections
+tar cvjpf home.tbz2 .env_secrets .config/syncthing .config/chromium .config/Code .config/sublime-text-3 .config/skypeforlinux .minecraft/ .mozilla/ .quodlibet/ .ssh/  Documents/ source/ --exclude source/go
