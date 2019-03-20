@@ -46,7 +46,7 @@ alias ae='cd ~/source/aeternity && ls'
 
 alias dockerclean='docker rm $(docker ps -aq)'
 
-alias listinstalledpackages="comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)"
+alias listinstalledpackages="pacman -Qent"
 alias findpackage='dpkg -S'
 source ~/.env_secrets
 
@@ -54,6 +54,7 @@ source ~/.env_secrets
 alias aecli-go='~/source/go/bin/aecli'
 alias aecli-py='/home/shinichi/.virtualenvs/aeternity/bin/aecli'
 alias aecli-js='node /home/shinichi/source/aeternity/aepp-cli-js/bin/aecli.js'
+alias aenode='cd ~/source/aeternity/aepp-sdk-go; docker-compose up node'
 
 # fzf bash bindings. Make Ctrl-T find in hidden directories too
 export FZF_CTRL_T_COMMAND='find .'
