@@ -28,8 +28,11 @@
         - ideviceinstaller  # for managing iPhone apps
         - iftop
         - ifuse  # to mount iPhone app directories, USB Mass Storage
+	- keepassxc
         - libimobiledevice-utils  # idevice_id, ideviceinfo, idevicepair (low level iOS utils)
         - mlocate
+	- ncdu  # ncurses du for directories
+	- newsboat  # RSS reader to avoid distraction
         - pamixer  # use pamixer instead of amixer to set volume on Manjaro/Arch
         - physlock  # the only screen locker that won't let you switch to VTs
         - powertop
@@ -64,7 +67,7 @@
       # compose key is a Unix specific key that helps with inputting foreign language alphabets
       # I can’t believe ctrl-alt-backspace is optional
       lineinfile:
-        path: /etc/default/keyboard
+        path: /etc/X11/xorg.conf.d/00-keyboard.conf
         state: present
         regexp: 'Option "XkbOptions"'
         line: 'Option "XkbOptions" "compose:paus,terminate:ctrl_alt_bksp,ctrl:nocaps"'
@@ -79,63 +82,11 @@
       tags:
         - dotfiles
 
-    - name: xset m 0 0 in .xprofile to make Trackpoint usable
-      # ~/.xprofile (not in ~/.xinitrc because it gets overwritten by something else later)
-      # ~/.xprofile should be sourced by GDM, LightDM, LXDM, SDDM.... and if not, you should source it from ~/.xinitrc.
-      lineinfile:
-        path: /home/{{ username }}/.xprofile
-        line: 'xset m 0 0'
-        state: present
-        regexp: '^xset'
-        create: yes
-      tags:
-        - dotfiles
-
-    - name: copy .bash_profile to ~{{ username }}
-      copy:
-        src: files/.bash_profile
-        dest: /home/{{ username }}/.bash_profile
-        owner: "{{ username }}"
-        group: "{{ username }}"
-        mode: 0644
-      tags:
-        - dotfiles
-
     - name: .bashrc should source .bash_profile
       lineinfile:
         path: /home/{{username}}/.bashrc
         state: present
         line: 'source ~/.bash_profile'
-      tags:
-        - dotfiles
-
-    - name: copy .emacs to ~{{ username }}
-      copy:
-        src: files/.emacs
-        dest: /home/{{ username }}/.emacs
-        owner: "{{ username }}"
-        group: "{{ username }}"
-        mode: 0644
-      tags:
-        - dotfiles
-
-    - name: copy .gitconfig to ~{{ username }}
-      copy:
-        src: files/.gitconfig
-        dest: /home/{{ username }}/.gitconfig
-        owner: "{{ username }}"
-        group: "{{ username }}"
-        mode: 0644
-      tags:
-        - dotfiles
-
-    - name: copy i3/ to ~{{ username }}/.config/
-      copy:
-        src: files/i3
-        dest: /home/{{ username }}/.config/
-        owner: "{{ username }}"
-        group: "{{ username }}"
-        mode: 0644
       tags:
         - dotfiles
 
