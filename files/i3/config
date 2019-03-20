@@ -187,7 +187,7 @@ bindcode 160 exec physlock
 bindcode 156 exec xset dpms force off
 
 # wallpaper
-exec_always --no-startup-id feh --bg-fill "/home/shinichi/Pictures/Simon Stalenhag/peripheral1_1920.jpg" # always runs when you restart i3
+exec_always --no-startup-id feh --bg-fill "/home/shinichi/Pictures/widescreen/Hayden-Panettiere-hayden-panettiere-1920x1200.jpg" # always runs when you restart i3
 
 # redshift
 exec --no-startup-id redshift-gtk
@@ -200,16 +200,9 @@ exec --no-startup-id udiskie -t
 exec --no-startup-id syndaemon -i 0.3 -K -R
 
 # Utilities: manual management of external displays, quick unmount disks
-set $dp DP-1
-set $lvds LVDS-1-1
-set $mode_utils (3) docked 3 monitors, (2) docked 2 monitors, (d) DP-1 and LVDS, (s) LVDS only, (e) eject block device, (p) screenshot to ~, (o) screenshot area to ~
+set $mode_utils (d) autorandr --change, (e) eject block device, (p) screenshot to ~, (o) screenshot area to ~
 mode "$mode_utils" {
-    # arandr generated this incredible xrandr command... I had nothing to do with it.
-    # n for docked mode, outputs to 3 monitors. Needs nvidia.
-    bindsym 3 exec --no-startup-id xrandr --output VIRTUAL1 --off --output LVDS-1-2 --off --output VGA-1-2 --off --output LVDS1 --mode 1920x1080 --pos 0x1080 --rotate normal --output DP-1-3 --mode 1920x1080 --pos 1144x0 --rotate normal --output DP-1-2 --mode 1280x1024 --pos 3064x0 --rotate normal --output DP-1-1 --off --output VGA1 --off
-    bindsym 2 exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output VGA-1-2 --off --output DP-1-3 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1-2 --off --output DP-1-1 --off
-    bindsym d exec --no-startup-id xrandr --output VIRTUAL1 --off --output LVDS-1-2 --off --output VGA-1-2 --off --output LVDS1 --primary --mode 1920x1080 --pos 312x1440 --rotate normal --output DP-1-3 --off --output DP-1-2 --off --output DP-1-1 --mode 2560x1440 --pos 0x0 --rotate normal --output VGA1 --off
-    bindsym s exec --no-startup-id xrandr --output VGA-1 --off --output LVDS-1-2 --off --output LVDS-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output VGA-1-2 --off --output DP-1-3 --off --output DP-1-2 --off --output DP-1-1 --off
+    bindsym d exec --no-startup-id autorandr --change
     bindsym e exec i3-input -F 'exec udiskie-umount /dev/%s' -P 'Eject /dev/'
     bindsym p exec --no-startup-id scrot -e 'mv $f ~'
     bindsym --release o exec --no-startup-id import ~/screenshot.png  # release is needed for import to grab the key here
@@ -232,10 +225,12 @@ bindsym $mod+slash scratchpad show
 
 # Startup applications
 exec emacs
+exec keepassxc
 
 # WM rules for certain programs (find their class names with xprop)
 for_window [class="Emacs"] floating enable sticky enable  # sticky makes it stick on the screen even when I change workspaces - it will only disappear when I toggle the scratchpad
 for_window [class="Anki"] floating enable
+for_window [class="(?i)keepassxc"] floating enable
 for_window [class="calendar"] floating enable
 #for_window [class="(?i)nautilus"] floating enable # (?i) case insensitive
 for_window [class="(?i)arandr"] floating enable
