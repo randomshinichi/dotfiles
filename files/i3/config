@@ -200,18 +200,21 @@ exec --no-startup-id udiskie -t
 exec --no-startup-id syndaemon -i 0.3 -K -R
 
 # Utilities: manual management of external displays, quick unmount disks
-set $mode_utils (d) autorandr --change, (e) eject block device, (p) screenshot to ~, (o) screenshot area to ~
+set $mode_utils (d) autorandr --change, (e) eject block device, (p) screenshot to ~, (s) screenshot area to ~
 mode "$mode_utils" {
     bindsym d exec --no-startup-id autorandr --change
-    bindsym e exec i3-input -F 'exec udiskie-umount /dev/%s' -P 'Eject /dev/'
+    bindsym e exec ~/.config/i3/eject.sh
     bindsym p exec --no-startup-id scrot -e 'mv $f ~'
-    bindsym --release o exec --no-startup-id import ~/screenshot.png  # release is needed for import to grab the key here
+    bindsym --release s exec --no-startup-id import ~/screenshot.png  # release is needed for import to grab the key here
     # back to normal: Enter or Escape
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
 # Declare here the shortcut to bring the utils selection menu
 bindsym $mod+x mode "$mode_utils"
+
+# o finder
+bindsym $mod+o exec --no-startup-id ~/.config/i3/o.sh
 
 # move workspaces between xrandr outputs
 bindsym $mod+Ctrl+Shift+Left move workspace to output left
@@ -223,17 +226,19 @@ bindsym $mod+Ctrl+Shift+Down move workspace to output down
 bindsym $mod+Shift+slash move scratchpad
 bindsym $mod+slash scratchpad show
 
+# Restore Layout before starting applications
+exec --no-startup-id i3-msg "workspace 3; append_layout ~/.config/i3/workspace-3.json"
+
 # Startup applications
 exec emacs
+#exec gnome-calendar
 exec keepassxc
 
 # WM rules for certain programs (find their class names with xprop)
 for_window [class="Emacs"] floating enable sticky enable  # sticky makes it stick on the screen even when I change workspaces - it will only disappear when I toggle the scratchpad
 for_window [class="Anki"] floating enable
-for_window [class="(?i)keepassxc"] floating enable
-for_window [class="calendar"] floating enable
-#for_window [class="(?i)nautilus"] floating enable # (?i) case insensitive
+
+for_window [class="(?i)nautilus"] floating enable # (?i) case insensitive
 for_window [class="(?i)arandr"] floating enable
 for_window [class="(?i)blueman-manager"] floating enable
 
-assign [class="Quodlibet"] 9
