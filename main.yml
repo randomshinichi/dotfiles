@@ -4,54 +4,53 @@
   vars:
     username: shinichi
   tasks:
-    - name: pacman -Syu
-      pacman: 
-        update_cache: yes
-        upgrade: yes
+    # - name: pacman -Syu
+    #   pacman: 
+    #     update_cache: yes
+    #     upgrade: yes
 
     - name: Install Basics
-      pacman: name={{ item }} state=latest
-      with_items:
-        - ansible
-        - anki
-        - bookworm
-        - chromium
-        - code  # OSS version of Visual Studio Code
-        - cups-pdf  # print to pdf
-        - emacs
-        - feh
-        - firefox
-        - go
-        - htop
-        - hugo
-        - i3
-        - ideviceinstaller  # for managing iPhone apps
-        - iftop
-        - ifuse  # to mount iPhone app directories, USB Mass Storage
-	- keepassxc
-        - libimobiledevice-utils  # idevice_id, ideviceinfo, idevicepair (low level iOS utils)
-        - mlocate
-	- ncdu  # ncurses du for directories
-	- newsboat  # RSS reader to avoid distraction
-        - pamixer  # use pamixer instead of amixer to set volume on Manjaro/Arch
-        - physlock  # the only screen locker that won't let you switch to VTs
-        - powertop
-        - quodlibet  # good replacement for fb2k
-        - ranger
-        - redshift
-        - redshift-gtk
-        - scrot
-        - syncthing
-        - veracrypt
-        - virtualenvwrapper
-        - zfs-utils  # need to install linux***-zfs/spl to actually get zfs working thogh
+      pacman: 
+        state: latest
+        name:
+          - ansible
+          - anki
+          - bookworm
+          - chromium
+          - code  # OSS version of Visual Studio Code
+          - cups-pdf  # print to pdf
+          - emacs
+          - feh
+          - firefox
+          - go
+          - htop
+          - hugo
+          - i3-wm
+          - iftop
+          - ifuse  # to mount iPhone app directories, USB Mass Storage
+          - keepassxc
+          - libimobiledevice  # idevice_id, ideviceinfo, idevicepair (low level iOS utils)
+          - mlocate
+          - ncdu  # ncurses du for directories
+          - newsboat  # RSS reader to avoid distraction
+          - pamixer  # use pamixer instead of amixer to set volume on Manjaro/Arch
+          - physlock  # the only screen locker that won't let you switch to VTs
+          - python-virtualenvwrapper
+          - powertop
+          - quodlibet  # good replacement for fb2k
+          - ranger
+          - redshift
+          - scrot
+          - syncthing
+          - veracrypt
+          - zfs-utils  # need to install linux***-zfs/spl to actually get zfs working thogh
 
     - name: Create {{ username }}, ensure that he can sudo
       user:
         name: "{{ username }}"
         state: present
         shell: /bin/bash
-        groups: sudo
+        groups: wheel
 
     # Validate the sudoers file before saving
     - name: ensure that {{ username }} can sudo without a password
@@ -91,18 +90,20 @@
         - dotfiles
 
     - name: utilities for i3 desktop
-      apt: name={{ item }} state=latest
-      with_items:
-        - arandr  # a GUI to configure xrandr (very useful)
-        - autorandr  # automatically switches between single/multi monitor when plugged/unplugged
-        - udiskie  # automatically mounts new disks
-        - lxappearance  # gtk engines: makes GTK apps beautiful outside of GTK environment
+      pacman: 
+        state: latest
+        name:
+          - arandr  # a GUI to configure xrandr (very useful)
+          - autorandr  # automatically switches between single/multi monitor when plugged/unplugged
+          - udiskie  # automatically mounts new disks
+          - lxappearance  # gtk engines: makes GTK apps beautiful outside of GTK environment
 
     - name: Install tlp to manage power
-      pacman: name={{ item }} state=latest
-      with_items:
-        - tlp
-        - acpi_call
+      pacman: 
+        state: latest
+        name:
+          - tlp
+          - acpi_call
       tags: tlp
 
     - name: tlp set battery thresholds
@@ -114,9 +115,8 @@
         insertafter: '# Main / Internal battery \(values in \%\)'
       tags: tlp
 
-    - name: enable service tlp, tlp-sleep and ensure it is not masked
-      systemd: name={{ item }} enabled=yes
-        with_items:
-         - tlp
-         - tlp-sleep
+    - name: enable service tlp, and ensure it is not masked
+      systemd:
+        enabled: yes
+        name: tlp
       tags: tlp

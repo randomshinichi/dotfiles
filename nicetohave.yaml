@@ -6,10 +6,11 @@
     username: shinichi
   tasks:
     - name: Install docker
-      pacman: name={{ item }} state=latest
-      with_items:
-      - docker
-      - docker-compose
+      pacman: 
+        state: latest
+        name:
+        - docker
+        - docker-compose
       tags: docker
 
     - name: add shinichi to docker group
