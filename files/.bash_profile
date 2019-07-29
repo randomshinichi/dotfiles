@@ -35,14 +35,15 @@ function set-title() {
 
 export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$(parse_git_branch) " # shinichi@ayanami:~/source/cryptocoins [master]$
 export GOPATH=~/source/go
-export PATH=$GOPATH/bin:$PATH
+export PATH=$GOPATH/bin:~/.local/bin:$PATH
 
 alias ez='nano ~/.bash_profile && source ~/.bash_profile'
 alias grw='git commit --amend --no-edit'
 alias gs='git status'
+alias gd='git diff'
 alias gcm='git commit -m'
 alias any='cd ~/source/anyledger && ls'
-alias ae='cd ~/source/aeternity && ls'
+alias ae='cd ~/source/aeternity && source ~/source/aeternity/env.sh && ls'
 
 alias dockerclean='docker rm $(docker ps -aq)'
 
@@ -54,7 +55,24 @@ source ~/.env_secrets
 alias aecli-go='~/source/go/bin/aecli'
 alias aecli-py='/home/shinichi/.virtualenvs/aeternity/bin/aecli'
 alias aecli-js='node /home/shinichi/source/aeternity/aepp-cli-js/bin/aecli.js'
-alias aenode='cd ~/source/aeternity/aepp-sdk-go; docker-compose up node'
+alias rlpp='python3 ~/source/aeternity/pp.py'
+
+function ae_inwhichblockwastx {
+ curl http://localhost:3013/v2/transactions/"$@" | jq
+}
+function ae_microblocktxs {
+ curl http://localhost:3013/v2/micro-blocks/hash/"$@"/transactions | jq
+}
+function aenode {
+while :
+do
+	docker rm $(docker ps -aq)
+	docker volume prune -f
+
+	cd ~/source/aeternity/aepp-sdk-go; docker-compose up node compiler
+done
+}
+alias ae_unittests='go test $(go list ./... |grep -v integration_test)'
 
 # fzf bash bindings. Make Ctrl-T find in hidden directories too
 export FZF_CTRL_T_COMMAND='find .'
