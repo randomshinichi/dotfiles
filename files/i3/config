@@ -41,7 +41,7 @@ bindsym $mod+F1 exec firefox
 bindsym $mod+F3 exec nautilus
 
 # kill focused window
-bindsym Mod1+F4 kill
+bindsym $mod+Shift+Q kill
 
 # start dmenu (a program launcher) with Alt-F2
 bindsym Mod1+F2 exec dmenu_run
@@ -102,6 +102,7 @@ bindsym $mod+a focus parent
 #bindsym $mod+d focus child
 
 # switch to workspace
+bindsym $mod+Ctrl+z workspace misc
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
 bindsym $mod+3 workspace 3
@@ -187,7 +188,7 @@ bindcode 160 exec physlock
 bindcode 156 exec xset dpms force off
 
 # wallpaper
-exec_always --no-startup-id feh --bg-fill "/home/shinichi/Pictures/widescreen/Hayden-Panettiere-hayden-panettiere-1920x1200.jpg" # always runs when you restart i3
+exec_always --no-startup-id feh --bg-fill "/home/shinichi/Pictures/widescreen/[animepaper.net]wallpaper-art-artists-yusuke-kozaki-benevolence-160049-tens-1920x1080-fd71cd0e.png" # always runs when you restart i3
 
 # redshift
 exec --no-startup-id redshift-gtk
@@ -200,12 +201,13 @@ exec --no-startup-id udiskie -t
 exec --no-startup-id syndaemon -i 0.3 -K -R
 
 # Utilities: manual management of external displays, quick unmount disks
-set $mode_utils (d) autorandr --change, (e) eject block device, (p) screenshot to ~, (s) screenshot area to ~
+set $mode_utils (d) autorandr horizontal, (s) single monitor, (e) eject block device, (p) screenshot to ~, (a) screenshot area to ~
 mode "$mode_utils" {
-    bindsym d exec --no-startup-id autorandr --change
+    bindsym d exec --no-startup-id autorandr horizontal
+    bindsym s exec --no-startup-id  xrandr --output VGA-0 --off --output LVDS-0 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-0 --off --output DP-1 --off --output DP-2 --off --output DP-3 --off --output DP-4 --off --output DP-5 --off
     bindsym e exec ~/.config/i3/eject.sh
     bindsym p exec --no-startup-id scrot -e 'mv $f ~'
-    bindsym --release s exec --no-startup-id import ~/screenshot.png  # release is needed for import to grab the key here
+    bindsym --release a exec --no-startup-id import ~/screenshot.png  # release is needed for import to grab the key here
     # back to normal: Enter or Escape
     bindsym Return mode "default"
     bindsym Escape mode "default"
@@ -227,12 +229,14 @@ bindsym $mod+Shift+slash move scratchpad
 bindsym $mod+slash scratchpad show
 
 # Restore Layout before starting applications
-exec --no-startup-id i3-msg "workspace 3; append_layout ~/.config/i3/workspace-3.json"
+exec --no-startup-id i3-msg "workspace misc; append_layout ~/.config/i3/workspace-misc.json"
 
 # Startup applications
 exec emacs
-#exec gnome-calendar
+exec gnome-calendar
+exec gnome-terminal --role "utilsterminal" -- newsboat
 exec keepassxc
+
 
 # WM rules for certain programs (find their class names with xprop)
 for_window [class="Emacs"] floating enable sticky enable  # sticky makes it stick on the screen even when I change workspaces - it will only disappear when I toggle the scratchpad
