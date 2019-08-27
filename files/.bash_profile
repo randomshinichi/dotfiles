@@ -72,6 +72,7 @@ do
 	cd ~/source/aeternity/aepp-sdk-go; docker-compose up node compiler
 done
 }
+alias aelogs='docker exec -it aepp-sdk-go_node_1 /usr/bin/tail -f log/aeternity.log'
 alias ae_unittests='go test $(go list ./... |grep -v integration_test)'
 
 # fzf bash bindings. Make Ctrl-T find in hidden directories too
