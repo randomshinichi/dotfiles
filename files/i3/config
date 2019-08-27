@@ -201,9 +201,10 @@ exec --no-startup-id udiskie -t
 exec --no-startup-id syndaemon -i 0.3 -K -R
 
 # Utilities: manual management of external displays, quick unmount disks
-set $mode_utils (d) autorandr horizontal, (s) single monitor, (e) eject block device, (p) screenshot to ~, (a) screenshot area to ~
+set $mode_utils (h) autorandr horizontal, (v) autorandr vertical, (s) single monitor, (e) eject block device, (p) screenshot to ~, (a) screenshot area to ~
 mode "$mode_utils" {
-    bindsym d exec --no-startup-id autorandr horizontal
+    bindsym h exec --no-startup-id autorandr horizontal
+    bindsym v exec --no-startup-id autorandr vertical
     bindsym s exec --no-startup-id  xrandr --output VGA-0 --off --output LVDS-0 --mode 1920x1080 --pos 0x0 --rotate normal --output DP-0 --off --output DP-1 --off --output DP-2 --off --output DP-3 --off --output DP-4 --off --output DP-5 --off
     bindsym e exec ~/.config/i3/eject.sh
     bindsym p exec --no-startup-id scrot -e 'mv $f ~'
@@ -234,7 +235,8 @@ exec --no-startup-id i3-msg "workspace misc; append_layout ~/.config/i3/workspac
 # Startup applications
 exec emacs
 exec gnome-calendar
-exec gnome-terminal --role "utilsterminal" -- newsboat
+exec st -n newsboatst newsboat
+exec st -n rangerst ranger
 exec keepassxc
 
 
