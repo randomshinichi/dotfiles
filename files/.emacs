@@ -86,6 +86,8 @@
 (setq org-capture-templates
       '(
 	("d" "dance.org" plain (file "~/Documents/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
+	("l" "lessons.org" plain (file+datetree "~/Documents/org/lessons/lessons.org") "*What would I have done differently?*\n\n*Successes/Mistakes*\n\n*Top Lessons/Insights*\n%?")
+	("r" "rolodex.org" entry (file "~/Documents/org/rolodex.org") "* %?\n:significance: %^{SIGNIFICANCE}\n:how_we_met: %^{HOW_WE_MET}\n:contact: %^{CONTACT}" :empty-lines-before 1)
 	("f" "food.org" plain (file+datetree "~/Documents/org/food.org") "%U %?")
 	)
       )
