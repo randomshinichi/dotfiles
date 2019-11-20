@@ -41,6 +41,7 @@
           - ranger
           - redshift
           - scrot
+          - st # simple terminal when you want something like xterm
           - syncthing
           - veracrypt
           - zfs-utils  # need to install linux***-zfs/spl to actually get zfs working thogh
@@ -95,8 +96,11 @@
         name:
           - arandr  # a GUI to configure xrandr (very useful)
           - autorandr  # automatically switches between single/multi monitor when plugged/unplugged
+          - dmenu # required for Win+D to work
+          - i3status
           - udiskie  # automatically mounts new disks
           - lxappearance  # gtk engines: makes GTK apps beautiful outside of GTK environment
+          - xorg-xbacklight
 
     - name: Install tlp to manage power
       pacman: 
