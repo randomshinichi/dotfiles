@@ -20,11 +20,11 @@
 (setq use-package-always-ensure t)
 (require 'use-package)
 
-(setq ergoemacs-theme nil)
-(setq ergoemacs-keyboard-layout "us")
-(use-package ergoemacs-mode)
-(require 'ergoemacs-mode)
-(ergoemacs-mode 1)
+;; (setq ergoemacs-theme nil)
+;; (setq ergoemacs-keyboard-layout "us")
+;; (require 'ergoemacs-mode)
+;; (use-package ergoemacs-mode)
+;; (ergoemacs-mode 1)
 
 ;; yes or no prompt -> y or n
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -45,7 +45,7 @@
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 
 ;; multiple cursors
-(use-package ergoemacs-mode)
+(use-package multiple-cursors)
 (require 'multiple-cursors)
 (global-set-key (kbd "<M-S-down>") 'mc/mark-next-like-this)
 (global-set-key (kbd "<M-S-up>") 'mc/mark-previous-like-this)
@@ -86,7 +86,7 @@
 (setq org-capture-templates
       '(
 	("d" "dance.org" plain (file "~/Documents/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
-	("l" "lessons.org" plain (file+datetree "~/Documents/org/lessons/lessons.org") "*What would I have done differently?*\n\n*Successes/Mistakes*\n\n*Top Lessons/Insights*\n%?")
+	("l" "lessons.org" plain (file+datetree "~/Documents/org/lessons/lessons.org") "*Top Lessons/Insights*\n%?")
 	("r" "rolodex.org" entry (file "~/Documents/org/rolodex.org") "* %?\n:significance: %^{SIGNIFICANCE}\n:how_we_met: %^{HOW_WE_MET}\n:contact: %^{CONTACT}" :empty-lines-before 1)
 	("f" "food.org" plain (file+datetree "~/Documents/org/food.org") "%U %?")
 	)
@@ -199,10 +199,6 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "<C-tab>") 'helm-mini)
 (define-key org-mode-map (kbd "<C-tab>") 'helm-mini) ; needs to be after require 'org
 
-;; undo-tree (C-x u to run undo-tree-visualize)
-(use-package undo-tree)
-(global-undo-tree-mode 1)
-
 ;; Find auto-wraps if it didn't find anything
 (defadvice isearch-repeat (after isearch-no-fail activate)
   (unless isearch-success
@@ -214,5 +210,19 @@ point reaches the beginning or end of the buffer, stop there."
 (define-key (current-global-map) [remap isearch-repeat] 'isearch-repeat)
 
 ;; Auto open files on startup
-(find-file "~/Documents/org/others/computers.org")
+(find-file "~/Documents/org/computers.org")
 (find-file "~/Documents/org/todo.org")
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (multiple-cursors which-key use-package spacemacs-theme spaceline helm))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
