@@ -1,0 +1,35 @@
+# firefly backup
+alias firefly='docker-compose -f ~/firefly/docker-compose.yml up'
+export FIREFLYBACKUPDIR=~/firefly_backups
+function fireflydump {
+        if test -z "$@"
+        then
+                echo "Please give a description for the backup!"
+        else
+                docker exec -it firefly_firefly_iii_db_1 pg_dump -U firefly firefly > $FIREFLYBACKUPDIR/firefly-$@.sql
+                docker run --rm --volumes-from firefly_firefly_iii_app_1 -v "$FIREFLYBACKUPDIR:/backup" ubuntu tar czvf /backup/firefly_upload-$@.tar.gz -C /var/www/firefly-iii/storage upload/
+                echo $@
+        fi
+}
+
+function fireflyrestore {
+        if test -z "$@"
+        then
+                echo "Please tell me which backup to restore!"
+        else
+                # no need to restore firefly_iii_export, there is nothing there
+                # make the volume firefly_firefly_iii_upload available in the container at /recover; make $FIREFLYBACKUPDIR available in the container at /backup; use a ubuntu image to untar the file into the v>
+                # --strip 1 removes the upload/ component of the files in the tar archive, which stores things as upload/*.json, upload/*.data
+                docker run --rm -v firefly_firefly_iii_upload:/recover -v $FIREFLYBACKUPDIR:/backup ubuntu tar zxvf /backup/firefly_upload-$@.tar.gz -C /recover --strip 1
+
+                docker-compose -f ~/firefly/docker-compose.yml up -d firefly_iii_db
+
+                sleep 2  # postgresql needs some time to start especially if there is no existing data
+                docker cp $FIREFLYBACKUPDIR/firefly-$@.sql firefly_firefly_iii_db_1:/root/firefly.sql
+                docker exec -it firefly_firefly_iii_db_1 psql -U firefly firefly -f /root/firefly.sql
+
+                docker-compose -f ~/firefly/docker-compose.yml down
+        fi
+}
+
+
