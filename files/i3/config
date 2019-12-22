@@ -34,7 +34,7 @@ floating_minimum_size 75 x 50
 floating_maximum_size -1 x -1
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id kitty
+bindsym $mod+Return exec --no-startup-id gnome-terminal
 
 # quick shortcuts for firefox, nautilus
 bindsym $mod+F1 exec firefox
@@ -196,18 +196,19 @@ bindsym XF86AudioMute exec pamixer -t
 bindsym XF86AudioLowerVolume exec pamixer -d 10
 bindsym XF86AudioRaiseVolume exec pamixer -i 10
 bindsym XF86AudioMicMute exec pamixer --source 1 -t
-bindsym XF86AudioPlay exec quodlibet --play-pause
-bindsym XF86Favorites exec quodlibet --run  # --run starts quodlibet only if no existing process exists
+bindsym XF86AudioPlay exec cmus-remote -u
+bindsym XF86Favorites exec cmus-remote -n
 
 # Brightness controls
 bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 20
 bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 20
 
 # Monitor switching
-set $monitor_options (h) autorandr horizontal, (v) autorandr vertical, (s) single monitor
+set $monitor_options (h) autorandr horizontal, (v) autorandr vertical, (s) single monitor, (c) --change to saved profile
 mode "$monitor_options" {
     bindsym h exec --no-startup-id autorandr horizontal
     bindsym v exec --no-startup-id autorandr vertical
+    bindsym v exec --no-startup-id autorandr --change
     bindsym s exec --no-startup-id xrandr --output eDP1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP1 --off --output DP2 --off --output HDMI1 --off --output HDMI2 --off --output VIRTUAL1 --off
     bindsym Return mode "default"
     bindsym Escape mode "default"
@@ -257,14 +258,10 @@ bindsym $mod+slash scratchpad show
 # Restore Layout before starting applications
 exec --no-startup-id i3-msg "workspace misc; append_layout ~/.config/i3/workspace-misc.json"
 
-# compton no shadows
-exec --no-startup-id compton --config ~/.config/compton.conf
-
 # Startup applications
 exec --no-startup-id emacs
 exec --no-startup-id st -n everything tmux new -s music 'newsboat;' split-window -h 'ranger;' new-window 'cmus;'
 exec --no-startup-id keepassxc
-
 
 # WM rules for certain programs (find their class names with xprop)
 for_window [class="Emacs"] floating enable sticky enable  # sticky makes it stick on the screen even when I change workspaces - it will only disappear when I toggle the scratchpad
