@@ -58,18 +58,10 @@ source ~/.env_secrets
 alias aecli-go='~/source/go/bin/aecli'
 alias aecli-py='/home/shinichi/.virtualenvs/aeternity/bin/aecli'
 alias aecli-js='node /home/shinichi/source/aeternity/aepp-cli-js/bin/aecli.js'
-alias rlpp='python3 ~/source/aeternity/pp.py'
-
-function ae_inwhichblockwastx {
- curl http://localhost:3013/v2/transactions/"$@" | jq
-}
-function ae_microblocktxs {
- curl http://localhost:3013/v2/micro-blocks/hash/"$@"/transactions | jq
-}
 
 function aenode {
 	docker rm $(docker ps -aq)
-	docker volume prune -f
+	docker volume rm aepp-sdk-go_node_db aepp-sdk-go_node_keys
 
 	cd -P ~/source/aeternity/aepp-sdk-go; docker-compose up node compiler
 }
@@ -78,7 +70,7 @@ function aenodes {
 while :
 do
 	docker rm $(docker ps -aq)
-	docker volume prune -f
+	docker volume rm aepp-sdk-go_node_db aepp-sdk-go_node_keys
 
 	cd -P ~/source/aeternity/aepp-sdk-go; docker-compose up node compiler
 done
