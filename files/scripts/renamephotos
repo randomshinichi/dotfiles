@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import json
+import subprocess
+import argparse
+
+class File:
+	def __init__(self, orig_name, index):
+		self.orig_name = orig_name
+		self.index = index
+		self.timestamp = ""
+
+	@property
+	def type(self):
+		# turn (100APPLE/IMG_3747, .JPG) into JPG 
+		return os.path.splitext(self.orig_name)[1][1:]
+	
+	@property
+	def final_name(self):
+		# zero pad the index to 4 digits, lowercase the file extension
+		return "{}/{}-{:0=4}.{}".format(os.path.dirname(self.orig_name), self.timestamp, self.index, self.type.lower())
+	
+	def __repr__(self):
+		return self.orig_name + ' -> ' + self.final_name
+
+def exiftool_handler(path):
+	files = []
+	o = subprocess.run(["exiftool -CreateDate -CreationDate -d %Y%m%d-%H%M%S -j \'{}\'".format(path)], shell=True, capture_output=True, text=True)
+
+	if o.returncode == 0:
+		for i, n in enumerate(json.loads(o.stdout)):
+			# enumerate starts from 0 instead of 1
+			i+=1
+
+			"""
+			{
+			"SourceFile": "102APPLE/IMG_2010.JPG",
+			"CreateDate": "20191110-190810"
+			},
+			{
+			"SourceFile": "102APPLE/IMG_2012.MOV",
+			"CreateDate": "20191110-191902",
+			"CreationDate": "20191110-201902"
+			},
+			"""
+			orig_name = n["SourceFile"]
+			f = File(orig_name, i)
+			
+			if f.type == "MOV":
+				f.timestamp = n.get("CreationDate")
+			else:
+				f.timestamp = n.get("CreateDate")
+			
+			files.append(f)
+	else:
+		raise Exception("exiftool had an error")
+	return files
+
+def rename_files(files, dry_run=False, verbose=False):
+	for f in files:
+		if not dry_run:
+			os.rename(f.orig_name, f.final_name)
+		if verbose:
+			print("rename", f.orig_name, "->", f.final_name)
+
+parser = argparse.ArgumentParser(description="Rename photos and videos according to their EXIF creation date")
+parser.add_argument("path", help="Path (will be searched recursively)")
+parser.add_argument("-n", "--notreally", action="store_true", help="don't actually rename files")
+parser.add_argument("-v", "--verbose", action="store_true", help="print original filenames and new filenames")
+args = parser.parse_args()
+# import ipdb; ipdb.set_trace()
+files = exiftool_handler(args.path)
+rename_files(files, dry_run=args.notreally, verbose=args.verbose)
