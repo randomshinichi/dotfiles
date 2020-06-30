@@ -53,8 +53,8 @@
               "percent": 0.333333333333333,
               "swallows": [
                 {
-                  "class": "^keepassxc$",
-                  "instance": "^keepassxc$"
+                  "class": "KeePassXC",
+                  "instance": "keepassxc"
                 }
               ],
               "type": "con"
@@ -69,12 +69,12 @@
                 "x": 0,
                 "y": 0
               },
-              "name": "tmux",
+              "name": "everything",
               "percent": 0.333333333333333,
               "swallows": [
                 {
-                  "class": "^st\\-256color$",
-                  "instance": "^everything$"
+                  "class": "st-256color",
+                  "instance": "everything"
                 }
               ],
               "type": "con"
