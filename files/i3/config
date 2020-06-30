@@ -36,12 +36,13 @@ floating_maximum_size -1 x -1
 # start a terminal
 bindsym $mod+Return exec --no-startup-id gnome-terminal
 
-# quick shortcuts for firefox, nautilus
+# quick shortcuts for firefox, file managers
 bindsym $mod+F1 exec firefox
+bindsym $mod+F2 exec gnome-terminal -- ranger
 bindsym $mod+F3 exec nautilus
 
 # kill focused window
-bindsym $mod+Shift+Q kill
+bindsym $mod+Shift+q kill
 
 # start dmenu (a program launcher) with Alt-F2
 bindsym Mod1+F2 exec dmenu_run
@@ -196,7 +197,7 @@ bindsym XF86AudioMute exec pamixer -t
 bindsym XF86AudioLowerVolume exec pamixer -d 10
 bindsym XF86AudioRaiseVolume exec pamixer -i 10
 bindsym XF86AudioMicMute exec pamixer --source 1 -t
-bindsym XF86AudioPlay exec cmus-remote -u
+bindsym XF86AudioPlay exec quodlibet --play-pause
 bindsym XF86Favorites exec cmus-remote -n
 
 # Brightness controls
@@ -216,7 +217,7 @@ mode "$monitor_options" {
 bindsym XF86Display mode "$monitor_options"
 
 # wallpaper
-exec_always --no-startup-id feh --bg-fill "/home/shinichi/Pictures/widescreen/Konachan-TohsakaxArcher.jpg" # always runs when you restart i3
+exec_always --no-startup-id feh --bg-fill "/home/shinichi/Pictures/widescreen/[AnimePaper]wallpapers_Neon-Genesis-Evangelion_AssasinXXX_1920x1200_102643.jpg" # always runs when you restart i3
 
 # redshift
 exec --no-startup-id redshift-gtk
@@ -260,11 +261,12 @@ exec --no-startup-id i3-msg "workspace misc; append_layout ~/.config/i3/workspac
 
 # Startup applications
 exec --no-startup-id emacs
-exec --no-startup-id st -n everything tmux new -s music 'newsboat;' split-window -h 'ranger;' new-window 'cmus;'
+exec --no-startup-id st -n everything
 exec --no-startup-id keepassxc
 
 # WM rules for certain programs (find their class names with xprop)
-for_window [class="Emacs"] floating enable sticky enable  # sticky makes it stick on the screen even when I change workspaces - it will only disappear when I toggle the scratchpad
+for_window [class="Emacs"] floating enable sticky enable
+# sticky makes it stick on the screen even when I change workspaces - it will only disappear when I toggle the scratchpad
 for_window [class="Anki"] floating enable
 
 for_window [class="(?i)Gnome-calculator"] floating enable
