@@ -35,6 +35,7 @@ function set-title() {
 
 export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$(parse_git_branch) " # shinichi@ayanami:~/source/cryptocoins [master]$
 export GOPATH=~/source/go
+export GOBIN=~/source/go/bin
 export PATH=$GOPATH/bin:~/.local/bin:$PATH
 export LIBVA_DRIVER_NAME=iHD
 
@@ -46,39 +47,15 @@ alias gs='git status'
 alias gd='git diff'
 alias gcm='git commit -m'
 alias gco='git checkout'
-alias ae='cd ~/source/aeternity && source ~/source/aeternity/env.sh && ls'
 
 alias dockerclean='docker rm $(docker ps -aq)'
+alias vpn='cd ~/.ironsocket && sudo openvpn Netherlands.ovpn'
+alias vpnjpn='cd ~/.ironsocket && sudo openvpn Japan.ovpn'
 
 alias listinstalledpackages="pacman -Qent"
 alias findpackage='dpkg -S'
 source ~/.env_secrets
 
-# aeternity CLI helper
-alias aecli-go='~/source/go/bin/aecli'
-alias aecli-py='/home/shinichi/.virtualenvs/aeternity/bin/aecli'
-alias aecli-js='node /home/shinichi/source/aeternity/aepp-cli-js/bin/aecli.js'
-
-function aenode {
-	docker rm $(docker ps -aq)
-	docker volume rm aepp-sdk-go_node_db aepp-sdk-go_node_keys
-
-	cd -P ~/source/aeternity/aepp-sdk-go; docker-compose up node compiler
-}
-
-function aenodes {
-while :
-do
-	docker rm $(docker ps -aq)
-	docker volume rm aepp-sdk-go_node_db aepp-sdk-go_node_keys
-
-	cd -P ~/source/aeternity/aepp-sdk-go; docker-compose up node compiler
-done
-}
-alias aelogs='docker exec -it aepp-sdk-go_node_1 /usr/bin/tail -f log/aeternity.log'
-alias ae_unittests='go test $(go list ./... |grep -v integration_test)'
-
-# fzf bash bindings. Make Ctrl-T find in hidden directories too
 export FZF_CTRL_T_COMMAND='find .'
 export FZF_ALT_C_COMMAND='find .'
 source /usr/share/fzf/key-bindings.bash
