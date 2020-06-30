@@ -1,0 +1,12 @@
+
+export TAPEDRIVE=/dev/nst1
+alias mtsetup='sudo mt -f $TAPEDRIVE stsetoptions scsi2logical && mt -f $TAPEDRIVE setblk 128k'
+alias mttell='mt -f $TAPEDRIVE tell'
+alias mtforward='mt -f $TAPEDRIVE fsf 1'
+alias mtbackward='mt -f $TAPEDRIVE bsfm 2'
+alias mtrewind='mt -f $TAPEDRIVE rewind && mttell'
+alias mteject='mt -f $TAPEDRIVE eject'
+alias mtend='mt -f $TAPEDRIVE eod'
+
+alias backupmusic='tar cf /mnt/hitachi/music.tar /data/music -b 256'
+alias backuppictures='tar cf /mnt/hitachi/pictures.tar /data/pictures -b 256'
