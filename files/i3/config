@@ -243,9 +243,6 @@ mode "$mode_utils" {
 # Declare here the shortcut to bring the utils selection menu
 bindsym $mod+x mode "$mode_utils"
 
-# o finder
-bindsym $mod+o exec --no-startup-id ~/.config/i3/o.sh
-
 # move workspaces between xrandr outputs
 bindsym $mod+Ctrl+Shift+Left move workspace to output left
 bindsym $mod+Ctrl+Shift+Right move workspace to output right
