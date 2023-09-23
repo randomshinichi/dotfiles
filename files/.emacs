@@ -86,13 +86,11 @@
 (setq org-capture-templates
       '(
 	("d" "dance.org" plain (file "~/Documents/org/dance.org") "* %?\n%u\n  %i\n" :empty-lines-before 1)
-	("l" "lessons.org" plain (file+datetree "~/Documents/org/lessons/lessons.org") "*Top Lessons/Insights*\n%?")
+	("l" "daily_lessons.org" plain (file+datetree "~/Documents/org/daily_lessons.org") "*One Big Thing Of The Day*\n*Today's Thoughts*\n%?" :time-prompt 1)
 	("r" "rolodex.org" entry (file "~/Documents/org/rolodex.org") "* %?\n:significance: %^{SIGNIFICANCE}\n:how_we_met: %^{HOW_WE_MET}\n:contact: %^{CONTACT}" :empty-lines-before 1)
 	("f" "food.org" plain (file+datetree "~/Documents/org/food.org") "%U %?")
 	)
       )
-(setq org-agenda-files (list "~/Documents/org/todo.org"
-			     "~/Documents/org/todo.org_archive"))
 
 ;; HELM not only has fuzzy searches but has helm-M-x which is way better than ido
 (use-package helm)
@@ -210,8 +208,11 @@ point reaches the beginning or end of the buffer, stop there."
 (define-key (current-global-map) [remap isearch-repeat] 'isearch-repeat)
 
 ;; Auto open files on startup
+(find-file "~/Documents/org/daily_lessons.org")
+(find-file "~/Documents/org/life.org")
 (find-file "~/Documents/org/computers.org")
-(find-file "~/Documents/org/todo.org")
+(find-file "~/Documents/org/work.org")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

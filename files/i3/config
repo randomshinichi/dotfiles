@@ -205,10 +205,11 @@ bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 20
 bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 20
 
 # Monitor switching
-set $monitor_options (h) autorandr horizontal, (v) autorandr vertical, (s) single monitor, (c) --change to saved profile
+set $monitor_options (a) ARandR, (h) autorandr horizontal, (v) autorandr vertical, (s) single monitor, (c) --change to saved profile
 mode "$monitor_options" {
-    bindsym h exec --no-startup-id autorandr horizontal
+    bindsym a exec --no-startup-id arandr
     bindsym v exec --no-startup-id autorandr vertical
+    bindsym h exec --no-startup-id autorandr horizontal
     bindsym c exec --no-startup-id autorandr --change
     bindsym s exec --no-startup-id xrandr --output eDP1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP1 --off --output DP2 --off --output HDMI1 --off --output HDMI2 --off --output VIRTUAL1 --off
     bindsym Return mode "default"
@@ -230,11 +231,12 @@ exec --no-startup-id udiskie -t
 exec --no-startup-id syndaemon -i 0.3 -K -R
 
 # Utilities
-set $mode_utils (l) lock, (e) eject block device, (p) screenshot to ~, (a) screenshot area to ~
+set $mode_utils (l) lock, (o) screen off (e) eject block device, (p) screenshot to ~, (a) screenshot area to ~
 mode "$mode_utils" {
     bindsym e exec ~/.config/i3/eject.sh
     bindsym p exec --no-startup-id scrot -e 'mv $f ~'
     bindsym l exec physlock
+    bindsym o exec xset dpms force off
     bindsym --release a exec --no-startup-id import ~/screenshot.png  # release is needed for import to grab the key here
     # back to normal: Enter or Escape
     bindsym Return mode "default"
@@ -260,6 +262,7 @@ exec --no-startup-id i3-msg "workspace misc; append_layout ~/.config/i3/workspac
 exec --no-startup-id emacs
 exec --no-startup-id st -n everything
 exec --no-startup-id keepassxc
+exec --no-startup-id /usr/lib/gsd-xsettings # wm light/dark mode
 
 # WM rules for certain programs (find their class names with xprop)
 for_window [class="Emacs"] floating enable sticky enable
