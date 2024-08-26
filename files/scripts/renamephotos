@@ -1,81 +1,105 @@
 #!/usr/bin/env python
-
 import os
 import sys
 import json
 import subprocess
 import argparse
+from datetime import datetime
+import multiprocessing
+
+TIMESTAMP_FIELDS = {
+    'jpg': ['DateTimeOriginal', 'CreateDate', 'FileModifyDate'],
+    'jpeg': ['DateTimeOriginal', 'CreateDate', 'FileModifyDate'],
+    'png': ['DateTimeOriginal', 'CreateDate', 'FileModifyDate'],
+    'dng': ['DateTimeOriginal', 'CreateDate', 'FileModifyDate'],
+    'arw': ['DateTimeOriginal', 'CreateDate', 'FileModifyDate'],
+    'heic': ['DateTimeOriginal', 'CreateDate', 'FileModifyDate'],
+    'mov': ['CreationDate', 'CreateDate', 'FileModifyDate'],
+    'mp4': ['MediaCreateDate', 'CreateDate', 'FileModifyDate']
+}
 
 class File:
-	def __init__(self, orig_name, index):
-		self.orig_name = orig_name
-		self.index = index
-		self.timestamp = ""
+    def __init__(self, orig_name):
+        self.orig_name = orig_name
+        self.timestamp = ""
+        self.model = ""
+        self.has_exif = True
+        self.all_timestamps = {}
 
-	@property
-	def type(self):
-		# turn (100APPLE/IMG_3747, .JPG) into JPG 
-		return os.path.splitext(self.orig_name)[1][1:]
-	
-	@property
-	def final_name(self):
-		# zero pad the index to 4 digits, lowercase the file extension
-		return "{}/{}-{:0=4}.{}".format(os.path.dirname(self.orig_name), self.timestamp, self.index, self.type.lower())
-	
-	def __repr__(self):
-		return self.orig_name + ' -> ' + self.final_name
+    @property
+    def type(self):
+        return os.path.splitext(self.orig_name)[1][1:].lower()
 
-def exiftool_handler(path):
-	files = []
-	command = "exiftool -CreateDate -CreationDate -d %Y%m%d-%H%M%S -j {}".format(path)
-	o = subprocess.run([command], shell=True, capture_output=True, text=True)
+    @property
+    def final_name(self):
+        if not self.has_exif:
+            return self.orig_name
+        rel_path = os.path.relpath(os.path.dirname(self.orig_name), start=args.path)
+        new_filename = f"{self.timestamp} ({self.model}).{self.type}"
+        return os.path.join(args.path, rel_path, new_filename)
 
-	if o.returncode == 0:
-		for i, n in enumerate(json.loads(o.stdout)):
-			# enumerate starts from 0 instead of 1
-			i+=1
+    def __repr__(self):
+        return f"{self.orig_name} -> {self.final_name}"
 
-			"""
-			{
-			"SourceFile": "102APPLE/IMG_2010.JPG",
-			"CreateDate": "20191110-190810"
-			},
-			{
-			"SourceFile": "102APPLE/IMG_2012.MOV",
-			"CreateDate": "20191110-191902",
-			"CreationDate": "20191110-201902"
-			},
-			"""
-			orig_name = n["SourceFile"]
-			f = File(orig_name, i)
-			
-			if f.type == "MOV":
-				f.timestamp = n.get("CreationDate")
-			else:
-				f.timestamp = n.get("CreateDate")
-			
-			files.append(f)
-	else:
-		message = "command: {}\n returncode: {}\n stdout: {}\n stderr: {}".format(command, o.returncode, o.stdout, o.stderr)
-		raise Exception(message)
-	return files
+def process_file(file_path):
+    command = f"exiftool -Model -CreateDate -CreationDate -MediaCreateDate -DateTimeOriginal -FileModifyDate -d %Y%m%d-%H%M%S -json '{file_path}'"
+    o = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+    if o.returncode == 0:
+        data = json.loads(o.stdout)[0]
+        f = File(data["SourceFile"])
+        f.model = data.get("Model", "Unknown camera")
+        f.all_timestamps = {k: data.get(k, "") for k in TIMESTAMP_FIELDS.get(f.type, [])}
+        
+        for field in TIMESTAMP_FIELDS.get(f.type, []):
+            if data.get(field):
+                f.timestamp = data[field]
+                break
+
+        if not f.timestamp:
+            f.has_exif = False
+            print(f"No EXIF timestamp found for {f.orig_name}. Filename will not be changed.")
+        
+        return f
+    else:
+        print(f"Error processing {file_path}: {o.stderr}")
+        return None
+
+def exiftool_handler(path, use_multiprocessing=True):
+    file_paths = []
+    
+    if args.recursive:
+        for root, _, filenames in os.walk(path):
+            for filename in filenames:
+                file_paths.append(os.path.abspath(os.path.join(root, filename)))
+    else:
+        file_paths = [os.path.abspath(os.path.join(path, f)) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
+    if use_multiprocessing:
+        with multiprocessing.Pool(4) as pool:
+            files = [f for f in pool.map(process_file, file_paths) if f is not None]
+    else:
+        files = [f for f in map(process_file, file_paths) if f is not None]
+
+    return files
 
 def rename_files(files, dry_run=False, verbose=False):
-	for f in files:
-		if not dry_run:
-			os.rename(f.orig_name, f.final_name)
-		if verbose:
-			print("rename", f.orig_name, "->", f.final_name)
+    for f in files:
+        if f.orig_name != f.final_name:
+            if not dry_run:
+                os.makedirs(os.path.dirname(f.final_name), exist_ok=True)
+                os.rename(f.orig_name, f.final_name)
+            if verbose:
+                print("rename", f.orig_name, "->", f.final_name)
 
 parser = argparse.ArgumentParser(description="Rename photos and videos according to their EXIF creation date")
 parser.add_argument("path", help="Path (will be searched non-recursively)")
 parser.add_argument("-r", "--recursive", action="store_true", help="search files recursively")
 parser.add_argument("-n", "--notreally", action="store_true", help="don't actually rename files")
 parser.add_argument("-v", "--verbose", action="store_true", help="print original filenames and new filenames")
+parser.add_argument("-m", "--multiprocess", action="store_true", help="use multiprocessing (default is single-process)")
 args = parser.parse_args()
-# import ipdb; ipdb.set_trace()
-if args.recursive:
-	files = exiftool_handler(os.path.join(args.path, "**/*"))
-else:
-	files = exiftool_handler(os.path.join(args.path, "*"))
+
+files = exiftool_handler(args.path, use_multiprocessing=args.multiprocess)
+
 rename_files(files, dry_run=args.notreally, verbose=args.verbose)
