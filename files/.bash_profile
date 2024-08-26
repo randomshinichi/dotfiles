@@ -63,8 +63,12 @@ function set-title() {
 export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$(parse_git_branch) " # shinichi@ayanami:~/source/cryptocoins [master]$
 export GOPATH=~/source/go
 export GOBIN=~/source/go/bin
-export PATH=~/.fly/bin:~/.local/share/solana/install/active_release/bin:~/.cargo/bin:$GOPATH/bin:~/.local/bin:./node_modules/.bin:~/.config/emacs/bin:$PATH
-export CARGO_BUILD_JOBS=6
+export PATH=~/.fly/bin:~/.local/share/solana/install/active_release/bin:/opt/google-cloud-sdk/bin:~/.cargo/bin:$GOPATH/bin:~/.local/bin:./node_modules/.bin:~/.config/emacs/bin:$PATH
+if [ "$(hostname)" = "asuka" ]; then
+    export CARGO_BUILD_JOBS=6
+else
+    unset CARGO_BUILD_JOBS
+fi
 
 alias df='df -xtmpfs -xdevtmpfs -xefivarfs'
 alias pc='sudo pacman'
