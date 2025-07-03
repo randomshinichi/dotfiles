@@ -73,7 +73,6 @@ fi
 alias df='df -xtmpfs -xdevtmpfs -xefivarfs'
 alias pc='sudo pacman'
 alias pcq='sudo pacman --noconfirm'
-alias ls='ls --color'
 alias ll='exa -l'
 alias lt='exa -T'
 alias ez='nano ~/.bash_profile && source ~/.bash_profile'
@@ -84,6 +83,7 @@ alias gd='git diff'
 alias gcm='git commit -n -m'
 alias gca='git commit --amend'
 alias gco='git checkout'
+alias gcp='git cherry-pick'
 alias grc='git rebase --continue'
 alias grs='git restore --staged'
 
@@ -102,7 +102,7 @@ alias gitget='cd ~/source/work/tmp && git clone'
 alias dockerclean='docker rm $(docker ps -aq)'
 alias dockervclean='docker volume rm $(docker volume ls -q)'
 alias vpn='cd ~/.purevpn/TCP && sudo openvpn ua2-ovpn-tcp.ovpn'
-alias sshfsfranziska='sshfs shinichi@franziska:/data ~/mnt'
+alias sshfsfranziska='sshfs shinichi@franziska:/home/shinichi/source/work/ ~/source/work/franziska'
 alias wakeupg5='wol 00:14:51:66:f0:54'
 alias listinstalledpackages="pacman -Qent"
 
@@ -111,16 +111,18 @@ alias dpsan="docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'"
 alias dlf='docker logs --follow'
 alias nmssave='sshfs steamdeck:"/home/deck/Games/Heroic/Prefixes/default/No Mans Sky/pfx/drive_c/users/steamuser/AppData/Roaming/HelloGames" ~/mnt'
 
+alias openwebui='DATA_DIR=~/.open-webui uv tool run --python 3.11 open-webui serve'
+
 export FZF_ALT_C_COMMAND='find ~/source/ -type d ! -path "*/\.git/*" ! -path "*/node_modules/*"'
 export PAGER=less
 source /usr/bin/virtualenvwrapper_lazy.sh
 source /usr/share/fzf/key-bindings.bash
 source /usr/share/nvm/init-nvm.sh
-bind -m emacs-standard '"\ew": " \C-b\C-k \C-u`fzf_cmd cd ~/source/work`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
-bind -m emacs-standard '"\ec": " \C-b\C-k \C-u`fzf_cmd code ~/source/work`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
-bind -m emacs-standard '"\es": " \C-b\C-k \C-u`fzf_cmd subl ~/source/work`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+bind -m emacs-standard '"\ew": " \C-b\C-k \C-u`fzf_cmd cd ~/source`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+bind -m emacs-standard '"\ec": " \C-b\C-k \C-u`fzf_cmd code ~/source`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+bind -m emacs-standard '"\es": " \C-b\C-k \C-u`fzf_cmd subl ~/source`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
 bind -x '"\ee": "generic_fzf '\''docker ps -a --format {{.Names}} | fzf'\''"'
 bind -x '"\eo": "generic_fzf '\''git branch | fzf'\''"'
 
 source ~/.env_secrets
-source ~/source/work/sync/mtstools/jupiter-shortcuts
+source "/home/shinichi/.wasmedge/env"
