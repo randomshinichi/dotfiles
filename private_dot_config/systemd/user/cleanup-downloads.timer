@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily cleanup of Downloads folder
+Requires=cleanup-downloads.service
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target
