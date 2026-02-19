@@ -1,0 +1,206 @@
+#!/usr/bin/env zsh
+
+# fzf-widgets - DRY fzf widgets for zsh
+# Usage: source /data/source/projects/fzf/fzf-widgets
+
+# ============================================================================
+# Scope registry
+# ============================================================================
+
+typeset -gA FZF_DIR_SCOPES
+typeset -gA FZF_FILE_SCOPES
+
+FZF_DIR_SCOPES=(
+    source  "/home/shinichi/source"
+    obs     "/home/shinichi/Documents/obs"
+)
+
+FZF_FILE_SCOPES=(
+    trading "/home/shinichi/Documents/obs/Efforts/Ongoing/Trading"
+    source  "/data/source"
+)
+
+# Last scope files
+export FZF_LAST_SCOPE_DIR_FILE="${HOME}/.cache/fzf-cache/last-scope.dir"
+export FZF_LAST_SCOPE_FILE_FILE="${HOME}/.cache/fzf-cache/last-scope.file"
+mkdir -p "${HOME}/.cache/fzf-cache"
+
+# ============================================================================
+# Utilities
+# ============================================================================
+
+__fzf_tildeify() {
+    local p="$1"
+    print -r -- "${p/#$HOME/~}"
+}
+
+__fzf_reset_prompt() {
+    zle reset-prompt
+}
+
+# ============================================================================
+# Directory listing
+# ============================================================================
+
+__fzf_list_dirs() {
+    local root="$1"
+    fd -t d --hidden --max-depth 5 --exclude .git --exclude node_modules --exclude __pycache__ . "$root" 2>/dev/null | sort
+}
+
+__fzf_list_files() {
+    local root="$1"
+    fd -t f --hidden \
+        --exclude .git \
+        --exclude __pycache__ \
+        --exclude node_modules \
+        --exclude .pnpm-store \
+        --exclude .yarn \
+        --exclude .next \
+        --exclude dist \
+        --exclude build \
+        --exclude coverage \
+        . "$root" 2>/dev/null | sort
+}
+
+# ============================================================================
+# Scope selection
+# ============================================================================
+
+__fzf_choose_scope_menu() {
+    local kind="$1"
+    local -a labels
+
+    if [[ "$kind" == "dir" ]]; then
+        labels=(${(k)FZF_DIR_SCOPES})
+    else
+        labels=(${(k)FZF_FILE_SCOPES})
+    fi
+
+    zle -I
+    printf "%s\n" ${labels[@]} | fzf --prompt="${kind} scope> " --height=40% --reverse
+}
+
+# ============================================================================
+# CD flow
+# ============================================================================
+
+__fzf_cd_flow() {
+    local mode="$1"
+    local label item abs rc
+
+    if [[ "$mode" == "menu" ]]; then
+        label="$(__fzf_choose_scope_menu dir)"
+        rc=$?
+        if (( rc != 0 )) || [[ -z "$label" ]]; then
+            __fzf_reset_prompt
+            return 0
+        fi
+        print -r -- "$label" >| "$FZF_LAST_SCOPE_DIR_FILE"
+    else
+        [[ -f "$FZF_LAST_SCOPE_DIR_FILE" ]] && label="$(<"$FZF_LAST_SCOPE_DIR_FILE")"
+        if [[ -z "$label" ]]; then
+            label="$(__fzf_choose_scope_menu dir)"
+            rc=$?
+            if (( rc != 0 )) || [[ -z "$label" ]]; then
+                __fzf_reset_prompt
+                return 0
+            fi
+            print -r -- "$label" >| "$FZF_LAST_SCOPE_DIR_FILE"
+        fi
+    fi
+
+    [[ -n "${FZF_DIR_SCOPES[$label]}" ]] || { __fzf_reset_prompt; return 0; }
+
+    local root="${FZF_DIR_SCOPES[$label]}"
+    
+    item=$(__fzf_list_dirs "$root" | fzf --prompt="cd (${label})> " --height=60% --reverse)
+    rc=$?
+
+    if (( rc != 0 )) || [[ -z "$item" ]]; then
+        __fzf_reset_prompt
+        return 0
+    fi
+
+    local dir="$item"
+    BUFFER="cd $dir"
+    zle accept-line
+    return 0
+}
+
+# ============================================================================
+# File pick flow
+# ============================================================================
+
+__fzf_file_flow() {
+    local mode="$1"
+    local label item abs rc
+
+    if [[ "$mode" == "menu" ]]; then
+        label="$(__fzf_choose_scope_menu file)"
+        rc=$?
+        if (( rc != 0 )) || [[ -z "$label" ]]; then
+            __fzf_reset_prompt
+            return 0
+        fi
+        print -r -- "$label" >| "$FZF_LAST_SCOPE_FILE_FILE"
+    else
+        [[ -f "$FZF_LAST_SCOPE_FILE_FILE" ]] && label="$(<"$FZF_LAST_SCOPE_FILE_FILE")"
+        if [[ -z "$label" ]]; then
+            label="$(__fzf_choose_scope_menu file)"
+            rc=$?
+            if (( rc != 0 )) || [[ -z "$label" ]]; then
+                __fzf_reset_prompt
+                return 0
+            fi
+            print -r -- "$label" >| "$FZF_LAST_SCOPE_FILE_FILE"
+        fi
+    fi
+
+    [[ -n "${FZF_FILE_SCOPES[$label]}" ]] || { __fzf_reset_prompt; return 0; }
+
+    local root="${FZF_FILE_SCOPES[$label]}"
+    
+    zle -I
+    item=$(__fzf_list_files "$root" | fzf --prompt="file (${label})> " --height=60% --reverse)
+    rc=$?
+
+    if (( rc != 0 )) || [[ -z "$item" ]]; then
+        __fzf_reset_prompt
+        return 0
+    fi
+
+    LBUFFER+="\"$item\""
+    
+    __fzf_reset_prompt
+    return 0
+}
+
+# ============================================================================
+# Widgets
+# ============================================================================
+
+fzf-widget-cd-last() {
+    __fzf_cd_flow last
+}
+
+fzf-widget-cd-menu() {
+    __fzf_cd_flow menu
+}
+
+fzf-widget-file-last() {
+    __fzf_file_flow last
+}
+
+fzf-widget-file-menu() {
+    __fzf_file_flow menu
+}
+
+zle -N fzf-widget-cd-last
+zle -N fzf-widget-cd-menu
+zle -N fzf-widget-file-last
+zle -N fzf-widget-file-menu
+
+bindkey '\ew' fzf-widget-cd-last
+bindkey '\eW' fzf-widget-cd-menu
+bindkey '\ef' fzf-widget-file-last
+bindkey '\eF' fzf-widget-file-menu

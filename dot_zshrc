@@ -59,10 +59,12 @@ zstyle ':vcs_info:git:*' formats '[%b%u%c]'
 zstyle ':vcs_info:git:*' check-for-changes true
 zstyle ':vcs_info:git:*' unstagedstr '*'
 precmd() { vcs_info }
-# export PS1="%F{green}%n@%m%f:%F{blue}%~%f\${vcs_info_msg_0_} "
+export CARGO_BUILD_JOBS=4
 export GOPATH=~/source/go
 export GOBIN=~/source/go/bin
 export PATH=~/.local/share/solana/install/active_release/bin:~/.cargo/bin:$GOPATH/bin:~/.local/bin:./node_modules/.bin:$PATH
+export OBSPLUGIN=~/Documents/obs/.obsidian/plugins
+export OBSTRADING=~/Documents/obs/Efforts/Ongoing/Trading
 
 alias df='df -xtmpfs -xdevtmpfs -xefivarfs'
 alias pc='sudo pacman'
@@ -70,7 +72,6 @@ alias pcq='sudo pacman --noconfirm'
 alias ll='exa -l'
 alias lt='exa -T'
 alias ez='nano ~/.zshrc && source ~/.zshrc'
-alias en='sudo nano /etc/nixos/configuration.nix'
 alias grw='git commit --amend --no-edit'
 alias gs='git status'
 alias gd='git diff'
@@ -81,57 +82,22 @@ alias gcp='git cherry-pick'
 alias grc='git rebase --continue'
 alias grs='git restore --staged'
 
-get_repo_name() {
-  echo "$1" \
-    | sed -E 's/.*:\/\/[^/]+\/(.*?)\.git.*/\1/' \
-    | tr '[:upper:]' '[:lower:]'
-}
-gitmp() {
-  cd ~/source/work/tmp || exit
-  git clone "$1"
-  subl "$(basename "$1" .git)"
-}
-alias gitget='cd ~/source/work/tmp && git clone'
-
 alias dockerclean='docker rm $(docker ps -aq)'
 alias dockervclean='docker volume rm $(docker volume ls -q)'
 alias vpn='cd ~/.purevpn/TCP && sudo openvpn ua2-ovpn-tcp.ovpn'
 alias sshfsfranziska='sshfs shinichi@franziska:/home/shinichi/source/work/ ~/source/work/franziska'
 alias wakeupg5='wol 00:14:51:66:f0:54'
 alias listinstalledpackages="pacman -Qent"
+alias fzfcdreindex='fzf_cd_reindex'
 
 alias dpsa='docker ps -a'
 alias dpsan="docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'"
 alias dlf='docker logs --follow'
 alias nmssave='sshfs steamdeck:"/home/deck/Games/Heroic/Prefixes/default/No Mans Sky/pfx/drive_c/users/steamuser/AppData/Roaming/HelloGames" ~/mnt'
 
-alias openwebui='DATA_DIR=~/.open-webui uv tool run --python 3.11 open-webui serve'
-
-export FZF_ALT_C_COMMAND='find ~/source/ -type d ! -path "*/\.git/*" ! -path "*/node_modules/*"'
 export PAGER=less
 
 bindkey -e  # Enable emacs mode
-# Equivalent of your fzf_cmd bindings
-fzf_cd_widget() {
-    local dir
-    dir=$(fd --type d . ~/source 2> /dev/null | fzf +m)
-    if [[ -n $dir ]]; then
-        LBUFFER="${LBUFFER}cd ${(q)dir}"
-    fi
-}
-zle -N fzf_cd_widget
-bindkey '\ew' fzf_cd_widget
-
-fzf_code_widget() {
-    local dir
-    dir=$(fd --type d . ~/source 2> /dev/null | fzf +m)
-    if [[ -n $dir ]]; then
-        LBUFFER="${LBUFFER}code ${(q)dir}"
-    fi
-}
-zle -N fzf_code_widget
-bindkey '\ec' fzf_code_widget
-
 docker_fzf_widget() {
     local selected_container
     selected_container=$(docker ps -a --format '{{.Names}}' | fzf)
@@ -144,4 +110,7 @@ bindkey '\ee' docker_fzf_widget
 
 source /usr/share/fzf/key-bindings.zsh
 source /usr/share/fzf/completion.zsh
+source ~/.fzf-widgets
 source ~/.env_secrets
+eval "$(direnv hook zsh)"
+. "$HOME/.rust-mcp-stack/bin/env"
