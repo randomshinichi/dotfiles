@@ -89,11 +89,16 @@ alias sshfsfranziska='sshfs shinichi@franziska:/home/shinichi/source/work/ ~/sou
 alias wakeupg5='wol 00:14:51:66:f0:54'
 alias listinstalledpackages="pacman -Qent"
 alias fzfcdreindex='fzf_cd_reindex'
-
+alias notionsync='cd ~/source/projects/obsidian-notion-sync && uv run journal-sync.py '
+alias updateprices='pushd && cd ~/source/projects/bot && uv run python data.py update --symbol BTCUSD --exchange INDEX --tf 1h 1m 1d && uv run data.py verify --symbol BTCUSD --exchange INDEX --tf 1m 1h 1d && popd '
 alias dpsa='docker ps -a'
 alias dpsan="docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'"
 alias dlf='docker logs --follow'
 alias nmssave='sshfs steamdeck:"/home/deck/Games/Heroic/Prefixes/default/No Mans Sky/pfx/drive_c/users/steamuser/AppData/Roaming/HelloGames" ~/mnt'
+
+alias llama-glm47f='~/source/llama/llama-server -hf unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF:IQ4_XS --port 8081 --host 0.0.0.0 --temp 0.7 --top-p 1.0 --min-p 0.01 --repeat-penalty 1.0 --cache-type-k q8_0 -ctv q8_0'
+alias llama-visual='~/source/llama/llama-server -hf unsloth/gemma-3-12b-it-qat-GGUF --port 8081 --host 0.0.0.0'
+alias llama-embeddings='~/source/llama/llama-server -hf nomic-ai/nomic-embed-text-v1.5-GGUF:Q6_K --port 8082 --host 0.0.0.0 --embeddings --ubatch-size 1024'
 
 export PAGER=less
 
