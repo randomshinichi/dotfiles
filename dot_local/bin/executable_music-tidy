@@ -1,0 +1,301 @@
+#!/usr/bin/env python3
+"""
+music-tidy - Rename album folders to "YYYY albumname" format based on music file metadata.
+
+Usage:
+    music-tidy [--preview] [--target-dir DIR]
+
+Options:
+    --preview       Show what would be renamed without actually renaming
+    --target-dir    Directory to process (default: current directory)
+"""
+
+import argparse
+import os
+import re
+from pathlib import Path
+from mutagen import File as MutagenFile
+from mutagen.id3 import ID3
+from mutagen.flac import FLAC
+from mutagen.mp4 import MP4
+from mutagen.oggvorbis import OggVorbis
+
+
+# Supported audio file extensions
+AUDIO_EXTENSIONS = {'.mp3', '.flac', '.m4a', '.m4b', '.ogg', '.opus', '.wav', '.aiff', '.aif'}
+
+
+def get_year_from_file(filepath):
+    """Extract year from music file metadata."""
+    try:
+        audio = MutagenFile(filepath)
+        if audio is None:
+            return None
+        
+        # Handle different file formats
+        if hasattr(audio, 'tags') and audio.tags is not None:
+            tags = audio.tags
+            
+            # MP3 (ID3) - TDRC is the recording date
+            if isinstance(tags, ID3):
+                if 'TDRC' in tags:
+                    year_str = str(tags['TDRC'].text[0])
+                    # Extract 4-digit year from date string
+                    match = re.match(r'(\d{4})', year_str)
+                    if match:
+                        return int(match.group(1))
+                # Fallback to TYER (older ID3 version)
+                if 'TYER' in tags:
+                    year_str = str(tags['TYER'].text[0])
+                    match = re.match(r'(\d{4})', year_str)
+                    if match:
+                        return int(match.group(1))
+            
+            # FLAC (Vorbis comments)
+            elif isinstance(audio, FLAC):
+                if 'date' in tags:
+                    year_str = str(tags['date'][0])
+                    match = re.match(r'(\d{4})', year_str)
+                    if match:
+                        return int(match.group(1))
+                if 'year' in tags:
+                    year_str = str(tags['year'][0])
+                    match = re.match(r'(\d{4})', year_str)
+                    if match:
+                        return int(match.group(1))
+            
+            # MP4/M4A
+            elif isinstance(audio, MP4):
+                if '\xa9day' in tags:
+                    year_str = str(tags['\xa9day'][0])
+                    match = re.match(r'(\d{4})', year_str)
+                    if match:
+                        return int(match.group(1))
+            
+            # Ogg Vorbis
+            elif isinstance(audio, OggVorbis):
+                if 'date' in tags:
+                    year_str = str(tags['date'][0])
+                    match = re.match(r'(\d{4})', year_str)
+                    if match:
+                        return int(match.group(1))
+                if 'year' in tags:
+                    year_str = str(tags['year'][0])
+                    match = re.match(r'(\d{4})', year_str)
+                    if match:
+                        return int(match.group(1))
+            
+            # Generic fallback - try to find any date/year tag
+            else:
+                for key in tags.keys():
+                    if key.lower() in ('date', 'year', 'tdrc', 'tyer'):
+                        try:
+                            value = tags[key]
+                            if hasattr(value, 'text'):
+                                year_str = str(value.text[0])
+                            else:
+                                year_str = str(value)
+                            match = re.match(r'(\d{4})', year_str)
+                            if match:
+                                return int(match.group(1))
+                        except (IndexError, AttributeError):
+                            continue
+    except Exception as e:
+        print(f"  Warning: Could not read metadata from {filepath.name}: {e}")
+        return None
+    
+    return None
+
+
+def get_audio_files(folder, recurse=True):
+    """Get all audio files in a folder, optionally recursing into subdirectories."""
+    audio_files = []
+    
+    def collect_files(path):
+        try:
+            for item in os.listdir(path):
+                item_path = os.path.join(path, item)
+                if os.path.isfile(item_path):
+                    ext = os.path.splitext(item)[1].lower()
+                    if ext in AUDIO_EXTENSIONS:
+                        audio_files.append(item_path)
+                elif recurse and os.path.isdir(item_path):
+                    collect_files(item_path)
+        except PermissionError:
+            pass
+    
+    collect_files(folder)
+    return audio_files
+
+
+def get_folder_year(folder):
+    """
+    Get the year for a folder by checking all audio files.
+    Returns (year, is_consistent, file_count) where:
+    - year: the year if all files have the same year, None otherwise
+    - is_consistent: True if all files have the same year
+    - file_count: number of audio files found
+    """
+    audio_files = get_audio_files(folder)
+    
+    if not audio_files:
+        return None, False, 0
+    
+    years = set()
+    for filepath in audio_files:
+        year = get_year_from_file(filepath)
+        if year is not None:
+            years.add(year)
+    
+    if len(years) == 1:
+        return years.pop(), True, len(audio_files)
+    elif len(years) == 0:
+        return None, False, len(audio_files)
+    else:
+        # Inconsistent years
+        return None, False, len(audio_files)
+
+
+def extract_album_name(folder_name):
+    """
+    Extract album name from folder name, removing any existing year references.
+    Handles formats like:
+    - "Album Name" -> "Album Name"
+    - "2021 Album Name" -> "Album Name"
+    - "21 Album Name" -> "Album Name"
+    - "Album Name (2021)" -> "Album Name"
+    - "Album Name 2021" -> "Album Name"
+    """
+    name = folder_name
+    
+    # Remove leading year patterns (YYYY or YY)
+    patterns = [
+        r'^(\d{4})\s+',           # YYYY at start
+        r'^(\d{2})\s+',           # YY at start
+        r'\s*\(\d{4}\)\s*$',      # (YYYY) at end
+        r'\s*-\s*\d{4}\s*$',      # - YYYY at end
+        r'\s+\d{4}\s*$',          # YYYY at end (space separated)
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, name)
+        if match:
+            name = name[:match.start()] + name[match.end():]
+            name = name.strip()
+            # Clean up any double spaces or trailing punctuation issues
+            name = re.sub(r'\s+', ' ', name)
+            name = name.strip(' -_')
+    
+    return name
+
+
+def needs_renaming(folder_name, year):
+    """Check if folder needs renaming to match YYYY albumname format."""
+    # Check if already starts with the correct year
+    pattern = rf'^{year}\s+'
+    if re.match(pattern, folder_name):
+        return False
+    return True
+
+
+def process_directory(target_dir, preview=False):
+    """Process all subdirectories in the target directory."""
+    target_path = Path(target_dir).resolve()
+    
+    # Get all subdirectories
+    folders = [d for d in target_path.iterdir() if d.is_dir()]
+    
+    if not folders:
+        print("No subdirectories found.")
+        return
+    
+    to_rename = []
+    skipped = []
+    
+    for folder in sorted(folders):
+        folder_name = folder.name
+        
+        # Skip if folder name is just "." or ".."
+        if folder_name in ('.', '..'):
+            continue
+        
+        year, is_consistent, file_count = get_folder_year(str(folder))
+        
+        if file_count == 0:
+            skipped.append((folder_name, "No audio files found"))
+            continue
+        
+        if not is_consistent:
+            skipped.append((folder_name, "Inconsistent or missing year metadata"))
+            continue
+        
+        if year is None:
+            skipped.append((folder_name, "Could not determine year from metadata"))
+            continue
+        
+        if not needs_renaming(folder_name, year):
+            skipped.append((folder_name, "Already correctly named"))
+            continue
+        
+        # Extract album name without any existing year prefix
+        album_name = extract_album_name(folder_name)
+        new_name = f"{year} {album_name}"
+        to_rename.append((folder_name, new_name))
+    
+    # Output
+    if to_rename:
+        print("Would rename:")
+        for old, new in to_rename:
+            if preview:
+                print(f"  {old} -> {new}")
+            else:
+                try:
+                    folder_path = target_path / old
+                    new_path = target_path / new
+                    folder_path.rename(new_path)
+                    print(f"  {old} -> {new}")
+                except Exception as e:
+                    print(f"  {old} -> ERROR: {e}")
+        print()
+    
+    if skipped:
+        print("Skipped:")
+        for name, reason in skipped:
+            print(f"  {name} ({reason})")
+        print()
+    
+    # Summary
+    print("=" * 60)
+    print("Summary:")
+    print(f"  Renamed:     {len(to_rename)}")
+    print(f"  Skipped:     {len(skipped)}")
+    print(f"  Total:       {len(folders)}")
+    
+    if preview and to_rename:
+        print()
+        print("Run without --preview to apply changes.")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Rename album folders to "YYYY albumname" format based on music file metadata.'
+    )
+    parser.add_argument(
+        '--preview',
+        action='store_true',
+        help='Show what would be renamed without actually renaming'
+    )
+    parser.add_argument(
+        '--target-dir',
+        type=str,
+        default='.',
+        help='Directory to process (default: current directory)'
+    )
+    
+    args = parser.parse_args()
+    
+    process_directory(args.target_dir, args.preview)
+
+
+if __name__ == '__main__':
+    main()
