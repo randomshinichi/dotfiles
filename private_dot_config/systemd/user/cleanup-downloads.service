@@ -4,5 +4,4 @@ After=graphical-session.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/find %h/Downloads -type f -atime +7 -delete
-ExecStart=/bin/find %h/Downloads -type d -empty -delete
+ExecStart=/bin/find %h/Downloads -type f -atime +2 -delete
